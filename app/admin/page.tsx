@@ -1,11 +1,52 @@
-import { CreateObligationForm } from "@/components/create-obligation-form";
-import { ObligationsTable } from "@/components/obligations-table";
+import { redirect } from "next/navigation";
+import { AdminCreateObligationPanel } from "@/components/admin-create-obligation-panel";
+import { AdminFilters } from "@/components/admin-filters";
+import { AdminObligationsTable } from "@/components/admin-obligations-table";
+import { AdminSubmenu } from "@/components/admin-submenu";
 import { PageShell } from "@/components/page-shell";
 import { StatCard } from "@/components/stat-card";
+import { getCurrentProfile } from "@/modules/auth/get-current-profile";
 import { getDashboardData } from "@/modules/obligations/get-dashboard-data";
 
-export default async function AdminPage() {
-  const { organizations, titles, obligations } = await getDashboardData();
+interface AdminPageProps {
+  searchParams: Promise<{
+    organization?: string;
+    title?: string;
+    status?: string;
+    q?: string;
+  }>;
+}
+
+export default async function AdminPage({ searchParams }: AdminPageProps) {
+  const params = await searchParams;
+
+  const { user, profile } = await getCurrentProfile();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  if (!profile || profile.role !== "admin" || !profile.is_active) {
+    redirect("/client");
+  }
+
+  const selectedOrganization = params.organization ?? "";
+  const selectedTitle = params.title ?? "";
+  const selectedStatus = params.status ?? "";
+  const searchText = params.q ?? "";
+
+  const {
+    allOrganizations,
+    allTitles,
+    visibleOrganizations,
+    visibleTitles,
+    obligations,
+  } = await getDashboardData(profile, {
+    organization: selectedOrganization || undefined,
+    title: selectedTitle || undefined,
+    status: selectedStatus || undefined,
+    q: searchText || undefined,
+  });
 
   const criticalAlerts = obligations.filter(
     (item) => item.status === "vencida" || item.priority === "alta"
@@ -16,19 +57,23 @@ export default async function AdminPage() {
       title="Panel administrativo"
       description="Aquí administraremos clientes, obligaciones, usuarios, documentos y suscripciones."
     >
+      <div className="mb-8">
+        <AdminSubmenu />
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Clientes activos"
-          value={organizations.length}
+          title="Clientes visibles"
+          value={visibleOrganizations.length}
           accentClass="text-emerald-400"
         />
         <StatCard
-          title="Títulos registrados"
-          value={titles.length}
+          title="Títulos visibles"
+          value={visibleTitles.length}
           accentClass="text-sky-400"
         />
         <StatCard
-          title="Obligaciones cargadas"
+          title="Obligaciones visibles"
           value={obligations.length}
           accentClass="text-amber-400"
         />
@@ -40,14 +85,28 @@ export default async function AdminPage() {
       </div>
 
       <div className="mt-8">
-        <CreateObligationForm organizations={organizations} titles={titles} />
+        <AdminFilters
+          organizations={allOrganizations}
+          titles={allTitles}
+          selectedOrganization={selectedOrganization}
+          selectedTitle={selectedTitle}
+          selectedStatus={selectedStatus}
+          searchText={searchText}
+        />
+      </div>
+
+      <div className="mt-8">
+        <AdminCreateObligationPanel
+          organizations={allOrganizations}
+          titles={allTitles}
+        />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
           <h2 className="text-2xl font-semibold">Organizaciones</h2>
           <div className="mt-4 space-y-3">
-            {organizations.map((org) => (
+            {visibleOrganizations.map((org) => (
               <div
                 key={org.id}
                 className="rounded-xl border border-slate-800 bg-slate-950 p-4"
@@ -67,7 +126,7 @@ export default async function AdminPage() {
         <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
           <h2 className="text-2xl font-semibold">Títulos mineros</h2>
           <div className="mt-4 space-y-3">
-            {titles.map((title) => (
+            {visibleTitles.map((title) => (
               <div
                 key={title.id}
                 className="rounded-xl border border-slate-800 bg-slate-950 p-4"
@@ -91,7 +150,7 @@ export default async function AdminPage() {
         <h2 className="mb-4 text-2xl font-semibold">
           Obligaciones registradas
         </h2>
-        <ObligationsTable obligations={obligations} />
+        <AdminObligationsTable obligations={obligations} />
       </div>
     </PageShell>
   );

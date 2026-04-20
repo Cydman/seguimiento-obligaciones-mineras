@@ -1,33 +1,21 @@
 import type { Obligation } from "@/types/obligations";
 
-type ObligationRow = {
-  id: string;
-  title_id: string;
-  organization_id: string;
-  code: string;
-  name: string;
-  authority: Obligation["authority"];
-  status: Obligation["status"];
-  priority: Obligation["priority"];
-  due_date: string;
-  description: string;
-  legal_basis: string | null;
-  created_at: string;
-};
-
-export function mapObligationRow(row: ObligationRow): Obligation {
+export function mapObligationRow(row: any): Obligation {
   return {
     id: row.id,
-    titleId: row.title_id,
     organizationId: row.organization_id,
+    titleId: row.title_id,
     code: row.code,
     name: row.name,
     authority: row.authority,
     status: row.status,
     priority: row.priority,
+    category: row.category,
     dueDate: row.due_date,
     description: row.description,
-    legalBasis: row.legal_basis ?? undefined,
+    legalBasis: row.legal_basis,
+    assignedProfileId: row.assigned_profile_id,
     createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }

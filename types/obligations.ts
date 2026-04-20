@@ -6,36 +6,43 @@ export type ObligationStatus =
 
 export type ObligationPriority = "alta" | "media" | "baja";
 
-export type AuthorityCode = "ANM" | "ANLA" | "CAR" | "MUNICIPIO" | "OTRA";
-
-export interface Organization {
-  id: string;
-  name: string;
-  documentNumber: string;
-  subscriptionPlan: "basico" | "profesional" | "empresarial";
-}
-
-export interface MiningTitle {
-  id: string;
-  code: string;
-  name: string;
-  mineral: string;
-  municipality: string;
-  department: string;
-  organizationId: string;
-}
+export type ObligationCategory =
+  | "tecnica"
+  | "juridica"
+  | "economica"
+  | "social"
+  | "ambiental";
 
 export interface Obligation {
   id: string;
-  titleId: string;
   organizationId: string;
+  titleId: string;
   code: string;
   name: string;
-  authority: AuthorityCode;
+  authority: string;
   status: ObligationStatus;
   priority: ObligationPriority;
+  category: ObligationCategory;
   dueDate: string;
   description: string;
-  legalBasis?: string;
+  legalBasis: string | null;
+  assignedProfileId: string | null;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface ObligationActivityLog {
+  id: string;
+  obligation_id: string;
+  actor_profile_id: string | null;
+  action: string;
+  note: string | null;
+  payload: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+  attachment_path: string | null;
+  attachment_name: string | null;
+  attachment_mime: string | null;
+  attachment_size: number | null;
+  is_system: boolean;
 }

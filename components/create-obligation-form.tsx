@@ -1,8 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createObligationAction } from "@/app/admin/actions";
 
 interface OrganizationOption {
   id: string;
@@ -25,91 +23,19 @@ export function CreateObligationForm({
   organizations,
   titles,
 }: CreateObligationFormProps) {
-  const router = useRouter();
-
-  const initialOrganizationId = organizations[0]?.id ?? "";
-  const [organizationId, setOrganizationId] = useState(initialOrganizationId);
-
-  const availableTitles = useMemo(() => {
-    return titles.filter((title) => title.organization_id === organizationId);
-  }, [titles, organizationId]);
-
-  const [titleId, setTitleId] = useState(availableTitles[0]?.id ?? "");
-  const [code, setCode] = useState("");
-  const [name, setName] = useState("");
-  const [authority, setAuthority] = useState("ANM");
-  const [priority, setPriority] = useState("media");
-  const [status, setStatus] = useState("pendiente");
-  const [dueDate, setDueDate] = useState("");
-  const [description, setDescription] = useState("");
-  const [legalBasis, setLegalBasis] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-
-  function handleOrganizationChange(newOrganizationId: string) {
-    setOrganizationId(newOrganizationId);
-
-    const relatedTitles = titles.filter(
-      (title) => title.organization_id === newOrganizationId
-    );
-
-    setTitleId(relatedTitles[0]?.id ?? "");
-  }
-
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
-    setMessage("");
-
-    const { error } = await supabase.from("obligations").insert({
-      organization_id: organizationId,
-      title_id: titleId,
-      code,
-      name,
-      authority,
-      status,
-      priority,
-      due_date: dueDate,
-      description,
-      legal_basis: legalBasis || null,
-    });
-
-    setLoading(false);
-
-    if (error) {
-      setMessage(`Error al guardar: ${error.message}`);
-      return;
-    }
-
-    setCode("");
-    setName("");
-    setAuthority("ANM");
-    setPriority("media");
-    setStatus("pendiente");
-    setDueDate("");
-    setDescription("");
-    setLegalBasis("");
-    setMessage("Obligación registrada correctamente.");
-
-    router.refresh();
-  }
-
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-      <h2 className="text-2xl font-semibold text-white">
-        Registrar nueva obligación
-      </h2>
-
-      <form onSubmit={handleSubmit} className="mt-6 grid gap-4 md:grid-cols-2">
+    <form action={createObligationAction} className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2">
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
             Organización
           </label>
           <select
-            value={organizationId}
-            onChange={(e) => handleOrganizationChange(e.target.value)}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
+            name="organization_id"
+            required
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           >
+            <option value="">Selecciona una organización</option>
             {organizations.map((org) => (
               <option key={org.id} value={org.id}>
                 {org.name}
@@ -123,11 +49,12 @@ export function CreateObligationForm({
             Título minero
           </label>
           <select
-            value={titleId}
-            onChange={(e) => setTitleId(e.target.value)}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
+            name="title_id"
+            required
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           >
-            {availableTitles.map((title) => (
+            <option value="">Selecciona un título</option>
+            {titles.map((title) => (
               <option key={title.id} value={title.id}>
                 {title.code} - {title.name}
               </option>
@@ -137,30 +64,27 @@ export function CreateObligationForm({
 
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
-            Código
+            Categoría
           </label>
-          <input
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            type="text"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
-            placeholder="OBL-ANM-005"
+          <select
+            name="category"
             required
-          />
+            defaultValue="juridica"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+          >
+            <option value="tecnica">Técnica</option>
+            <option value="juridica">Jurídica</option>
+            <option value="economica">Económica</option>
+            <option value="social">Social</option>
+            <option value="ambiental">Ambiental</option>
+          </select>
         </div>
 
-        <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
-            Nombre de la obligación
-          </label>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            type="text"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
-            placeholder="Ej. Presentación de informe anual"
-            required
-          />
+        <div className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3">
+          <p className="text-sm text-slate-400">Código</p>
+          <p className="mt-1 text-sm text-white">
+            Se generará automáticamente al guardar.
+          </p>
         </div>
 
         <div>
@@ -168,9 +92,9 @@ export function CreateObligationForm({
             Autoridad
           </label>
           <select
-            value={authority}
-            onChange={(e) => setAuthority(e.target.value)}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
+            name="authority"
+            required
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           >
             <option value="ANM">ANM</option>
             <option value="ANLA">ANLA</option>
@@ -185,9 +109,10 @@ export function CreateObligationForm({
             Prioridad
           </label>
           <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
+            name="priority"
+            required
+            defaultValue="media"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           >
             <option value="alta">Alta</option>
             <option value="media">Media</option>
@@ -200,9 +125,10 @@ export function CreateObligationForm({
             Estado
           </label>
           <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
+            name="status"
+            required
+            defaultValue="pendiente"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           >
             <option value="pendiente">Pendiente</option>
             <option value="en_proceso">En proceso</option>
@@ -216,11 +142,23 @@ export function CreateObligationForm({
             Fecha de vencimiento
           </label>
           <input
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
+            name="due_date"
             type="date"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
             required
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            Nombre de la obligación
+          </label>
+          <input
+            name="name"
+            type="text"
+            required
+            placeholder="Ej. Presentación de informe técnico semestral"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           />
         </div>
 
@@ -229,11 +167,11 @@ export function CreateObligationForm({
             Descripción
           </label>
           <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="min-h-28 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
-            placeholder="Describe la obligación y el seguimiento requerido."
+            name="description"
             required
+            rows={4}
+            placeholder="Describe la obligación y el seguimiento requerido."
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           />
         </div>
 
@@ -242,27 +180,22 @@ export function CreateObligationForm({
             Fundamento jurídico o técnico
           </label>
           <textarea
-            value={legalBasis}
-            onChange={(e) => setLegalBasis(e.target.value)}
-            className="min-h-24 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
+            name="legal_basis"
+            rows={4}
             placeholder="Norma, acto administrativo, obligación contractual, requerimiento, etc."
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           />
         </div>
+      </div>
 
-        <div className="md:col-span-2 flex items-center gap-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:opacity-60"
-          >
-            {loading ? "Guardando..." : "Guardar obligación"}
-          </button>
-
-          {message ? (
-            <p className="text-sm text-slate-300">{message}</p>
-          ) : null}
-        </div>
-      </form>
-    </div>
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-slate-950"
+        >
+          Guardar obligación
+        </button>
+      </div>
+    </form>
   );
 }
