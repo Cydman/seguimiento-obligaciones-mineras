@@ -13,28 +13,6 @@ export type ObligationCategory =
   | "social"
   | "ambiental";
 
-export interface Organization {
-  id: string;
-  name: string;
-  documentNumber: string;
-  subscriptionPlan: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface MiningTitle {
-  id: string;
-  organizationId: string;
-  code: string;
-  name: string;
-  mineral: string;
-  municipality: string;
-  department: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface Obligation {
   id: string;
   organizationId: string;

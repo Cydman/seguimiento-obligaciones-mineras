@@ -1,0 +1,94 @@
+"use client";
+
+import { updateSpecialistObligationAction } from "@/app/specialist/actions";
+import type { Obligation } from "@/types/obligations";
+
+export function SpecialistEditObligationForm({
+  obligation,
+}: {
+  obligation: Obligation;
+}) {
+  return (
+    <form action={updateSpecialistObligationAction} className="space-y-6">
+      <input type="hidden" name="obligation_id" value={obligation.id} />
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3">
+          <p className="text-sm text-slate-400">Código</p>
+          <p className="mt-1 text-sm text-white">{obligation.code}</p>
+        </div>
+
+        <div className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3">
+          <p className="text-sm text-slate-400">Categoría</p>
+          <p className="mt-1 text-sm text-white">{obligation.category}</p>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-300">Estado</label>
+          <select
+            name="status"
+            defaultValue={obligation.status}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+          >
+            <option value="pendiente">Pendiente</option>
+            <option value="en_proceso">En proceso</option>
+            <option value="cumplida">Cumplida</option>
+            <option value="vencida">Vencida</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-300">Prioridad</label>
+          <select
+            name="priority"
+            defaultValue={obligation.priority}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+          >
+            <option value="alta">Alta</option>
+            <option value="media">Media</option>
+            <option value="baja">Baja</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-300">Fecha de vencimiento</label>
+          <input
+            name="due_date"
+            type="date"
+            defaultValue={obligation.dueDate}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="mb-2 block text-sm font-medium text-slate-300">Descripción</label>
+          <textarea
+            name="description"
+            defaultValue={obligation.description}
+            rows={4}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="mb-2 block text-sm font-medium text-slate-300">Fundamento jurídico o técnico</label>
+          <textarea
+            name="legal_basis"
+            defaultValue={obligation.legalBasis ?? ""}
+            rows={4}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-slate-950"
+        >
+          Guardar cambios
+        </button>
+      </div>
+    </form>
+  );
+}

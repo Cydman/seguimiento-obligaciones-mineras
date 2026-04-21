@@ -1,65 +1,29 @@
 "use client";
 
-import { createObligationAction } from "@/app/admin/actions";
+import { updateObligationAction } from "@/app/admin/actions";
+import type { Obligation } from "@/types/obligations";
 
-interface OrganizationOption {
+interface AssignableProfile {
   id: string;
-  name: string;
+  email: string | null;
+  full_name: string | null;
 }
 
-interface TitleOption {
-  id: string;
-  code: string;
-  name: string;
-  organization_id: string;
-}
-
-interface CreateObligationFormProps {
-  organizations: OrganizationOption[];
-  titles: TitleOption[];
-}
-
-export function CreateObligationForm({
-  organizations,
-  titles,
-}: CreateObligationFormProps) {
+export function AdminEditObligationForm({
+  obligation,
+  assignableProfiles,
+}: {
+  obligation: Obligation;
+  assignableProfiles: AssignableProfile[];
+}) {
   return (
-    <form action={createObligationAction} className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
-            Organización
-          </label>
-          <select
-            name="organization_id"
-            required
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
-          >
-            <option value="">Selecciona una organización</option>
-            {organizations.map((org) => (
-              <option key={org.id} value={org.id}>
-                {org.name}
-              </option>
-            ))}
-          </select>
-        </div>
+    <form action={updateObligationAction} className="space-y-6">
+      <input type="hidden" name="obligation_id" value={obligation.id} />
 
-        <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
-            Título minero
-          </label>
-          <select
-            name="title_id"
-            required
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
-          >
-            <option value="">Selecciona un título</option>
-            {titles.map((title) => (
-              <option key={title.id} value={title.id}>
-                {title.code} - {title.name}
-              </option>
-            ))}
-          </select>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3">
+          <p className="text-sm text-slate-400">Código</p>
+          <p className="mt-1 text-sm text-white">{obligation.code}</p>
         </div>
 
         <div>
@@ -68,8 +32,7 @@ export function CreateObligationForm({
           </label>
           <select
             name="category"
-            required
-            defaultValue="juridica"
+            defaultValue={obligation.category}
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           >
             <option value="tecnica">Técnica</option>
@@ -80,11 +43,15 @@ export function CreateObligationForm({
           </select>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3">
-          <p className="text-sm text-slate-400">Código</p>
-          <p className="mt-1 text-sm text-white">
-            Se generará automáticamente al guardar.
-          </p>
+        <div className="md:col-span-2">
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            Nombre de la obligación
+          </label>
+          <input
+            name="name"
+            defaultValue={obligation.name}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+          />
         </div>
 
         <div>
@@ -93,7 +60,7 @@ export function CreateObligationForm({
           </label>
           <select
             name="authority"
-            required
+            defaultValue={obligation.authority}
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           >
             <option value="ANM">ANM</option>
@@ -110,8 +77,7 @@ export function CreateObligationForm({
           </label>
           <select
             name="priority"
-            required
-            defaultValue="media"
+            defaultValue={obligation.priority}
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           >
             <option value="alta">Alta</option>
@@ -126,8 +92,7 @@ export function CreateObligationForm({
           </label>
           <select
             name="status"
-            required
-            defaultValue="pendiente"
+            defaultValue={obligation.status}
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           >
             <option value="pendiente">Pendiente</option>
@@ -144,22 +109,27 @@ export function CreateObligationForm({
           <input
             name="due_date"
             type="date"
-            required
+            defaultValue={obligation.dueDate}
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           />
         </div>
 
         <div className="md:col-span-2">
           <label className="mb-2 block text-sm font-medium text-slate-300">
-            Nombre de la obligación
+            Responsable asignado
           </label>
-          <input
-            name="name"
-            type="text"
-            required
-            placeholder="Ej. Presentación de informe técnico semestral"
+          <select
+            name="assigned_profile_id"
+            defaultValue={obligation.assignedProfileId ?? ""}
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
-          />
+          >
+            <option value="">Sin asignar</option>
+            {assignableProfiles.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.full_name || item.email || item.id}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="md:col-span-2">
@@ -168,9 +138,8 @@ export function CreateObligationForm({
           </label>
           <textarea
             name="description"
-            required
+            defaultValue={obligation.description}
             rows={4}
-            placeholder="Describe la obligación y el seguimiento requerido."
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           />
         </div>
@@ -181,8 +150,8 @@ export function CreateObligationForm({
           </label>
           <textarea
             name="legal_basis"
+            defaultValue={obligation.legalBasis ?? ""}
             rows={4}
-            placeholder="Norma, acto administrativo, obligación contractual, requerimiento, etc."
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
           />
         </div>
@@ -193,7 +162,7 @@ export function CreateObligationForm({
           type="submit"
           className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-slate-950"
         >
-          Guardar obligación
+          Guardar cambios
         </button>
       </div>
     </form>
