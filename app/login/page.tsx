@@ -35,7 +35,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     if (signInError || !authData.user) {
       redirect("/login?error=Credenciales%20inv%C3%A1lidas");
     }
-
+  
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role, is_active")
