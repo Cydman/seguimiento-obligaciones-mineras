@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { CreateObligationForm } from "@/components/create-obligation-form";
 import { ObligationsTable } from "@/components/obligations-table";
 import { PageShell } from "@/components/page-shell";

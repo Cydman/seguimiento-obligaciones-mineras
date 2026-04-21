@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default function LoginPage() {
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
