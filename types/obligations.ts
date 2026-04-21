@@ -46,3 +46,27 @@ export interface ObligationActivityLog {
   attachment_size: number | null;
   is_system: boolean;
 }
+
+export interface Organization {
+  id: string;
+  name: string;
+  documentNumber: string;
+  subscriptionPlan: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MiningTitle {
+  id: string;
+  organizationId: string;
+  code: string;
+  name: string;
+  mineral: string;
+  stage?: string | null;
+  status?: string | null;
+  municipality?: string | null;
+  department?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
