@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/status-badge";
+import { formatDateDisplay } from "@/lib/format-date";
 import type { Obligation } from "@/types/obligations";
 
 interface ObligationsTableProps {
@@ -21,6 +22,36 @@ function formatCategory(category: string) {
       return "Ambiental";
     default:
       return category;
+  }
+}
+
+function formatAuthority(authority: string) {
+  switch (authority) {
+    case "ANM":
+      return "ANM";
+    case "ANLA":
+      return "ANLA";
+    case "CAR":
+      return "CAR";
+    case "MUNICIPIO":
+      return "Municipio";
+    case "OTRA":
+      return "Otra";
+    default:
+      return authority;
+  }
+}
+
+function formatPriority(priority: string) {
+  switch (priority) {
+    case "alta":
+      return "Alta";
+    case "media":
+      return "Media";
+    case "baja":
+      return "Baja";
+    default:
+      return priority;
   }
 }
 
@@ -59,9 +90,11 @@ export function ObligationsTable({
                 </td>
                 <td className="px-4 py-3">{obligation.name}</td>
                 <td className="px-4 py-3">{formatCategory(obligation.category)}</td>
-                <td className="px-4 py-3">{obligation.authority}</td>
-                <td className="px-4 py-3 capitalize">{obligation.priority}</td>
-                <td className="px-4 py-3">{obligation.dueDate}</td>
+                <td className="px-4 py-3">{formatAuthority(obligation.authority)}</td>
+                <td className="px-4 py-3">{formatPriority(obligation.priority)}</td>
+                <td className="px-4 py-3">
+                  {formatDateDisplay(obligation.dueDate)}
+                </td>
                 <td className="px-4 py-3">
                   <StatusBadge status={obligation.status} />
                 </td>

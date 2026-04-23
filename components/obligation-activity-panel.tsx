@@ -5,29 +5,16 @@ import {
   removeActivityAttachmentAction,
   updateManualActivityAction,
 } from "@/app/obligations/activity-actions";
+import { formatDateDisplay, formatDateTimeDisplay } from "@/lib/format-date";
 import type { ObligationActivityLog } from "@/types/obligations";
 import { Download, Paperclip, Pencil, Save, Trash2 } from "lucide-react";
 
 type PanelRole = "admin" | "specialist" | "client";
 
-function formatDate(value: string, role: PanelRole) {
-  const date = new Date(value);
-
-  if (role === "admin") {
-    return new Intl.DateTimeFormat("es-CO", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
-  }
-
-  return new Intl.DateTimeFormat("es-CO", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(date);
+function formatActivityDate(value: string, role: PanelRole) {
+  return role === "admin"
+    ? formatDateTimeDisplay(value)
+    : formatDateDisplay(value);
 }
 
 export function ObligationActivityPanel({
@@ -114,7 +101,7 @@ export function ObligationActivityPanel({
             canEdit ? (
               <details key={log.id} className="border-t border-slate-800">
                 <summary className="grid cursor-pointer list-none grid-cols-[1fr_1fr_2fr_auto_auto] gap-3 px-4 py-3 text-sm text-slate-200">
-                  <div>{formatDate(log.created_at, role)}</div>
+                  <div>{formatActivityDate(log.created_at, role)}</div>
                   <div className="truncate">{log.action}</div>
                   <div className="truncate">{log.note || "-"}</div>
                   <div className="flex items-center gap-2">
@@ -225,7 +212,7 @@ export function ObligationActivityPanel({
                 key={log.id}
                 className="grid grid-cols-[1fr_1fr_2.2fr_auto] gap-3 border-t border-slate-800 px-4 py-3 text-sm text-slate-200"
               >
-                <div>{formatDate(log.created_at, role)}</div>
+                <div>{formatActivityDate(log.created_at, role)}</div>
                 <div className="truncate">{log.action}</div>
                 <div className="truncate">{log.note || "-"}</div>
                 <div className="flex items-center">

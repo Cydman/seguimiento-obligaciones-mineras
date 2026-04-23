@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDateDisplay } from "@/lib/format-date";
 import type { Obligation } from "@/types/obligations";
 
 interface ObligationDetailCardProps {
@@ -20,6 +21,51 @@ function formatCategory(category: string) {
       return "Ambiental";
     default:
       return category;
+  }
+}
+
+function formatAuthority(authority: string) {
+  switch (authority) {
+    case "ANM":
+      return "ANM";
+    case "ANLA":
+      return "ANLA";
+    case "CAR":
+      return "CAR";
+    case "MUNICIPIO":
+      return "Municipio";
+    case "OTRA":
+      return "Otra";
+    default:
+      return authority;
+  }
+}
+
+function formatPriority(priority: string) {
+  switch (priority) {
+    case "alta":
+      return "Alta";
+    case "media":
+      return "Media";
+    case "baja":
+      return "Baja";
+    default:
+      return priority;
+  }
+}
+
+function formatStatus(status: string) {
+  switch (status) {
+    case "pendiente":
+      return "Pendiente";
+    case "en_proceso":
+      return "En proceso";
+    case "cumplida":
+      return "Cumplida";
+    case "vencida":
+      return "Vencida";
+    default:
+      return status;
   }
 }
 
@@ -49,10 +95,10 @@ export function ObligationDetailCard({
 
           <div className="grid gap-2 text-sm text-slate-300 md:grid-cols-2">
             <p>Categoría: {formatCategory(obligation.category)}</p>
-            <p>Autoridad: {obligation.authority}</p>
-            <p>Estado: {obligation.status}</p>
-            <p>Prioridad: {obligation.priority}</p>
-            <p>Vence: {obligation.dueDate}</p>
+            <p>Autoridad: {formatAuthority(obligation.authority)}</p>
+            <p>Estado: {formatStatus(obligation.status)}</p>
+            <p>Prioridad: {formatPriority(obligation.priority)}</p>
+            <p>Vence: {formatDateDisplay(obligation.dueDate)}</p>
           </div>
         </div>
 

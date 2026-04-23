@@ -3,6 +3,7 @@ import { AdminEditObligationForm } from "@/components/admin-edit-obligation-form
 import { ObligationActivityPanel } from "@/components/obligation-activity-panel";
 import { ObligationDetailCard } from "@/components/obligation-detail-card";
 import { PageShell } from "@/components/page-shell";
+import { UploadObligationDocumentForm } from "@/components/upload-obligation-document-form";
 import { getCurrentProfile } from "@/modules/auth/get-current-profile";
 import { getObligationAdminDetail } from "@/modules/obligations/get-obligation-admin-detail";
 
@@ -13,6 +14,7 @@ export default async function AdminObligationDetailPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{
     updated?: string;
+    uploaded?: string;
     activity_saved?: string;
     activity_updated?: string;
     activity_deleted?: string;
@@ -38,11 +40,17 @@ export default async function AdminObligationDetailPage({
   return (
     <PageShell
       title="Detalle de obligación"
-      description="Consulta, edita y gestiona el historial manual de actuaciones."
+      description="Consulta, edita y gestiona el historial manual de actuaciones y documentos base."
     >
       {query.updated === "1" ? (
         <div className="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
           Obligación actualizada correctamente.
+        </div>
+      ) : null}
+
+      {query.uploaded === "1" ? (
+        <div className="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
+          Documento base cargado correctamente.
         </div>
       ) : null}
 
@@ -86,6 +94,8 @@ export default async function AdminObligationDetailPage({
             </div>
           </details>
         </div>
+
+        <UploadObligationDocumentForm obligationId={obligation.id} />
 
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold">Historial de actuaciones</h2>
