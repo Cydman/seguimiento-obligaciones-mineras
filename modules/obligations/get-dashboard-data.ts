@@ -27,11 +27,15 @@ export async function getDashboardData(
           .eq("id", profile.organization_id),
 
     profile.role === "admin"
-      ? supabase.from("mining_titles").select("*").order("name")
+      ? supabase
+          .from("mining_titles")
+          .select("*")
+          .order("code")
       : supabase
           .from("mining_titles")
           .select("*")
-          .eq("organization_id", profile.organization_id),
+          .eq("organization_id", profile.organization_id)
+          .order("code"),
   ]);
 
   if (orgError) {

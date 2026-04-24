@@ -10,9 +10,11 @@ export function StatCard({
   accentClass = "text-white",
 }: StatCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 px-5 py-4">
-      <p className="text-sm font-medium text-slate-400">{title}</p>
-      <p className={`mt-2 text-3xl font-bold ${accentClass}`}>{value}</p>
+    <div className="rounded-2xl border border-slate-800 bg-slate-900 px-4 py-3">
+      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+        {title}
+      </p>
+      <p className={`mt-1 text-2xl font-bold ${accentClass}`}>{value}</p>
     </div>
   );
 }

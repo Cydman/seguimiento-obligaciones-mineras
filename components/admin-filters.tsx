@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
 interface OrganizationOption {
   id: string;
@@ -10,6 +13,7 @@ interface TitleOption {
   code: string;
   name: string;
   organization_id: string;
+  mine_name?: string | null;
 }
 
 interface AdminFiltersProps {
@@ -29,23 +33,39 @@ export function AdminFilters({
   selectedStatus = "",
   searchText = "",
 }: AdminFiltersProps) {
-  const filteredTitles = selectedOrganization
-    ? titles.filter((title) => title.organization_id === selectedOrganization)
-    : titles;
+  const [organizationId, setOrganizationId] = useState(selectedOrganization);
+  const [titleId, setTitleId] = useState(selectedTitle);
+
+  const filteredTitles = useMemo(() => {
+    if (!organizationId) return titles;
+    return titles.filter((title) => title.organization_id === organizationId);
+  }, [titles, organizationId]);
+
+  useEffect(() => {
+    if (!titleId) return;
+
+    const exists = filteredTitles.some((title) => title.id === titleId);
+    if (!exists) setTitleId("");
+  }, [filteredTitles, titleId]);
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-      <h2 className="text-2xl font-semibold">Filtros de consulta</h2>
-
-      <form method="GET" className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="rounded-2xl border border-slate-800 bg-slate-900 px-4 py-4">
+      <form
+        method="GET"
+        className="grid gap-3 xl:grid-cols-[1.2fr_1.2fr_0.9fr_1.4fr_auto_auto]"
+      >
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
-            Cliente / organización
+          <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-400">
+            Organización
           </label>
           <select
             name="organization"
-            defaultValue={selectedOrganization}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
+            value={organizationId}
+            onChange={(e) => {
+              setOrganizationId(e.target.value);
+              setTitleId("");
+            }}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-emerald-500"
           >
             <option value="">Todas</option>
             {organizations.map((org) => (
@@ -57,31 +77,32 @@ export function AdminFilters({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
-            Título minero
+          <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-400">
+            Título
           </label>
           <select
             name="title"
-            defaultValue={selectedTitle}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
+            value={titleId}
+            onChange={(e) => setTitleId(e.target.value)}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-emerald-500"
           >
             <option value="">Todos</option>
             {filteredTitles.map((title) => (
               <option key={title.id} value={title.id}>
-                {title.code} - {title.name}
+                {title.code} - {title.mine_name || title.name}
               </option>
             ))}
           </select>
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-400">
             Estado
           </label>
           <select
             name="status"
             defaultValue={selectedStatus}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-emerald-500"
           >
             <option value="">Todos</option>
             <option value="pendiente">Pendiente</option>
@@ -92,7 +113,7 @@ export function AdminFilters({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-400">
             Buscar
           </label>
           <input
@@ -100,25 +121,23 @@ export function AdminFilters({
             defaultValue={searchText}
             type="text"
             placeholder="Código o nombre"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-500"
           />
         </div>
 
-        <div className="md:col-span-2 lg:col-span-4 flex gap-3">
-          <button
-            type="submit"
-            className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-emerald-400"
-          >
-            Aplicar filtros
-          </button>
+        <button
+          type="submit"
+          className="self-end rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
+        >
+          Aplicar filtros
+        </button>
 
-          <Link
-            href="/admin"
-            className="rounded-xl border border-slate-700 px-5 py-3 font-semibold text-white transition hover:border-slate-500"
-          >
-            Limpiar
-          </Link>
-        </div>
+        <Link
+          href="/admin"
+          className="self-end rounded-xl border border-slate-700 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:border-slate-500"
+        >
+          Limpiar
+        </Link>
       </form>
     </div>
   );

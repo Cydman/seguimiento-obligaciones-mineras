@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { AdminCreateObligationPanel } from "@/components/admin-create-obligation-panel";
 import { AdminFilters } from "@/components/admin-filters";
 import { AdminObligationsTable } from "@/components/admin-obligations-table";
-import { AdminSubmenu } from "@/components/admin-submenu";
+import { AdminOrganizationsTable } from "@/components/admin-organizations-table";
+import { AdminTitlesTable } from "@/components/admin-titles-table";
 import { PageShell } from "@/components/page-shell";
 import { StatCard } from "@/components/stat-card";
 import { getCurrentProfile } from "@/modules/auth/get-current-profile";
@@ -19,7 +20,6 @@ interface AdminPageProps {
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   const params = await searchParams;
-
   const { user, profile } = await getCurrentProfile();
 
   if (!user) {
@@ -55,36 +55,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   return (
     <PageShell
       title="Panel administrativo"
-      description="Aquí administraremos clientes, obligaciones, usuarios, documentos y suscripciones."
+      description="Administra obligaciones, organizaciones, títulos y usuarios desde una vista centralizada."
     >
-      <div className="mb-8">
-        <AdminSubmenu />
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Clientes visibles"
-          value={visibleOrganizations.length}
-          accentClass="text-emerald-400"
-        />
-        <StatCard
-          title="Títulos visibles"
-          value={visibleTitles.length}
-          accentClass="text-sky-400"
-        />
-        <StatCard
-          title="Obligaciones visibles"
-          value={obligations.length}
-          accentClass="text-amber-400"
-        />
-        <StatCard
-          title="Alertas críticas"
-          value={criticalAlerts}
-          accentClass="text-red-400"
-        />
-      </div>
-
-      <div className="mt-8">
+      <div className="space-y-5">
         <AdminFilters
           organizations={allOrganizations}
           titles={allTitles}
@@ -93,64 +66,63 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           selectedStatus={selectedStatus}
           searchText={searchText}
         />
-      </div>
 
-      <div className="mt-8">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            title="Clientes visibles"
+            value={visibleOrganizations.length}
+            accentClass="text-emerald-400"
+          />
+          <StatCard
+            title="Títulos visibles"
+            value={visibleTitles.length}
+            accentClass="text-sky-400"
+          />
+          <StatCard
+            title="Obligaciones visibles"
+            value={obligations.length}
+            accentClass="text-amber-400"
+          />
+          <StatCard
+            title="Alertas críticas"
+            value={criticalAlerts}
+            accentClass="text-red-400"
+          />
+        </div>
+
         <AdminCreateObligationPanel
           organizations={allOrganizations}
           titles={allTitles}
-        />
-      </div>
+        >
+          <AdminObligationsTable obligations={obligations} />
+        </AdminCreateObligationPanel>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Organizaciones</h2>
-          <div className="mt-4 space-y-3">
-            {visibleOrganizations.map((org) => (
-              <div
-                key={org.id}
-                className="rounded-xl border border-slate-800 bg-slate-950 p-4"
-              >
-                <p className="font-semibold">{org.name}</p>
-                <p className="text-sm text-slate-400">
-                  Documento: {org.document_number}
-                </p>
-                <p className="text-sm text-slate-400">
-                  Plan: {org.subscription_plan}
-                </p>
-              </div>
-            ))}
-          </div>
+        <div className="grid gap-5 xl:grid-cols-2">
+          <section className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold">Organizaciones</h2>
+              <p className="mt-1 text-sm text-slate-400">
+                Listado compacto editable de organizaciones visibles.
+              </p>
+            </div>
+
+            <AdminOrganizationsTable organizations={visibleOrganizations} />
+          </section>
+
+          <section className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold">Títulos mineros</h2>
+              <p className="mt-1 text-sm text-slate-400">
+                Consulta y edición compacta de títulos visibles.
+              </p>
+            </div>
+
+            <AdminTitlesTable
+              titles={visibleTitles}
+              organizations={allOrganizations}
+            />
+          </section>
         </div>
-
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Títulos mineros</h2>
-          <div className="mt-4 space-y-3">
-            {visibleTitles.map((title) => (
-              <div
-                key={title.id}
-                className="rounded-xl border border-slate-800 bg-slate-950 p-4"
-              >
-                <p className="font-semibold">
-                  {title.code} - {title.name}
-                </p>
-                <p className="text-sm text-slate-400">
-                  Mineral: {title.mineral}
-                </p>
-                <p className="text-sm text-slate-400">
-                  Ubicación: {title.municipality}, {title.department}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-8">
-        <h2 className="mb-4 text-2xl font-semibold">
-          Obligaciones registradas
-        </h2>
-        <AdminObligationsTable obligations={obligations} />
       </div>
     </PageShell>
   );

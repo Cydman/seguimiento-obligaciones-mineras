@@ -14,7 +14,7 @@ export function AdminSubmenu() {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-wrap gap-3 rounded-2xl border border-slate-800 bg-slate-900 p-4">
+    <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-800 bg-slate-900 p-3">
       {items.map((item) => {
         const active =
           pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -23,7 +23,7 @@ export function AdminSubmenu() {
           <Link
             key={item.href}
             href={item.href}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
+            className={`rounded-xl px-3 py-2 text-xs font-medium transition ${
               active
                 ? "bg-emerald-500 text-slate-950"
                 : "border border-slate-700 text-white hover:border-slate-500"
