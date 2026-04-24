@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { createObligationAction } from "@/app/admin/actions";
 
 interface OrganizationOption {
@@ -12,6 +13,8 @@ interface TitleOption {
   code: string;
   name: string;
   organization_id: string;
+  mine_name?: string | null;
+  is_active?: boolean;
 }
 
 interface CreateObligationFormProps {
@@ -23,6 +26,31 @@ export function CreateObligationForm({
   organizations,
   titles,
 }: CreateObligationFormProps) {
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState("");
+  const [selectedTitleId, setSelectedTitleId] = useState("");
+
+  const availableTitles = useMemo(() => {
+    if (!selectedOrganizationId) return [];
+
+    return titles
+      .filter(
+        (title) =>
+          title.organization_id === selectedOrganizationId &&
+          title.is_active !== false
+      )
+      .sort((a, b) => a.code.localeCompare(b.code, "es-CO"));
+  }, [titles, selectedOrganizationId]);
+
+  useEffect(() => {
+    if (!selectedTitleId) return;
+
+    const exists = availableTitles.some((title) => title.id === selectedTitleId);
+
+    if (!exists) {
+      setSelectedTitleId("");
+    }
+  }, [availableTitles, selectedTitleId]);
+
   return (
     <form action={createObligationAction} className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2">
@@ -32,8 +60,13 @@ export function CreateObligationForm({
           </label>
           <select
             name="organization_id"
+            value={selectedOrganizationId}
+            onChange={(e) => {
+              setSelectedOrganizationId(e.target.value);
+              setSelectedTitleId("");
+            }}
             required
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
           >
             <option value="">Selecciona una organización</option>
             {organizations.map((org) => (
@@ -50,16 +83,32 @@ export function CreateObligationForm({
           </label>
           <select
             name="title_id"
+            value={selectedTitleId}
+            onChange={(e) => setSelectedTitleId(e.target.value)}
             required
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            disabled={!selectedOrganizationId || availableTitles.length === 0}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <option value="">Selecciona un título</option>
-            {titles.map((title) => (
+            <option value="">
+              {!selectedOrganizationId
+                ? "Selecciona primero una organización"
+                : availableTitles.length === 0
+                ? "No hay títulos disponibles"
+                : "Selecciona un título"}
+            </option>
+
+            {availableTitles.map((title) => (
               <option key={title.id} value={title.id}>
-                {title.code} - {title.name}
+                {title.code} - {title.mine_name || title.name}
               </option>
             ))}
           </select>
+
+          <p className="mt-2 text-xs text-slate-400">
+            {selectedOrganizationId
+              ? `${availableTitles.length} título(s) disponible(s) para esta organización.`
+              : "El listado de títulos se filtra automáticamente por organización."}
+          </p>
         </div>
 
         <div>
@@ -70,7 +119,7 @@ export function CreateObligationForm({
             name="category"
             required
             defaultValue="juridica"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
           >
             <option value="tecnica">Técnica</option>
             <option value="juridica">Jurídica</option>
@@ -94,7 +143,7 @@ export function CreateObligationForm({
           <select
             name="authority"
             required
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
           >
             <option value="ANM">ANM</option>
             <option value="ANLA">ANLA</option>
@@ -112,7 +161,7 @@ export function CreateObligationForm({
             name="priority"
             required
             defaultValue="media"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
           >
             <option value="alta">Alta</option>
             <option value="media">Media</option>
@@ -128,7 +177,7 @@ export function CreateObligationForm({
             name="status"
             required
             defaultValue="pendiente"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
           >
             <option value="pendiente">Pendiente</option>
             <option value="en_proceso">En proceso</option>
@@ -144,9 +193,13 @@ export function CreateObligationForm({
           <input
             name="due_date"
             type="date"
+            lang="es-CO"
             required
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
           />
+          <p className="mt-2 text-xs text-slate-400">
+            La plataforma mostrará esta fecha en formato día/mes/año.
+          </p>
         </div>
 
         <div className="md:col-span-2">
@@ -158,7 +211,7 @@ export function CreateObligationForm({
             type="text"
             required
             placeholder="Ej. Presentación de informe técnico semestral"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
           />
         </div>
 
@@ -171,7 +224,7 @@ export function CreateObligationForm({
             required
             rows={4}
             placeholder="Describe la obligación y el seguimiento requerido."
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
           />
         </div>
 
@@ -183,7 +236,7 @@ export function CreateObligationForm({
             name="legal_basis"
             rows={4}
             placeholder="Norma, acto administrativo, obligación contractual, requerimiento, etc."
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
           />
         </div>
       </div>
@@ -191,7 +244,7 @@ export function CreateObligationForm({
       <div className="flex justify-end">
         <button
           type="submit"
-          className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-slate-950"
+          className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-emerald-400"
         >
           Guardar obligación
         </button>
