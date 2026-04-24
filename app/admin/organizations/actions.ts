@@ -5,6 +5,29 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentProfile } from "@/modules/auth/get-current-profile";
 
+function normalizeSubscriptionPlan(value: FormDataEntryValue | null) {
+  const text = String(value ?? "").trim().toLowerCase();
+
+  if (text === "basico" || text === "basic") return "basico";
+  if (
+    text === "profesional" ||
+    text === "professional" ||
+    text === "pro"
+  ) {
+    return "profesional";
+  }
+
+  if (
+    text === "empresarial" ||
+    text === "enterprise" ||
+    text === "premium"
+  ) {
+    return "empresarial";
+  }
+
+  return "";
+}
+
 export async function createOrganizationAction(formData: FormData) {
   const { user, profile } = await getCurrentProfile();
 
@@ -15,7 +38,9 @@ export async function createOrganizationAction(formData: FormData) {
 
   const name = String(formData.get("name") ?? "").trim();
   const documentNumber = String(formData.get("document_number") ?? "").trim();
-  const subscriptionPlan = String(formData.get("subscription_plan") ?? "").trim();
+  const subscriptionPlan = normalizeSubscriptionPlan(
+    formData.get("subscription_plan")
+  );
   const isActive = String(formData.get("is_active") ?? "true").trim() === "true";
 
   if (!name || !documentNumber || !subscriptionPlan) {
@@ -52,7 +77,9 @@ export async function updateOrganizationAction(formData: FormData) {
   const organizationId = String(formData.get("organization_id") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
   const documentNumber = String(formData.get("document_number") ?? "").trim();
-  const subscriptionPlan = String(formData.get("subscription_plan") ?? "").trim();
+  const subscriptionPlan = normalizeSubscriptionPlan(
+    formData.get("subscription_plan")
+  );
   const isActive = String(formData.get("is_active") ?? "true").trim() === "true";
 
   if (!organizationId || !name || !documentNumber || !subscriptionPlan) {
