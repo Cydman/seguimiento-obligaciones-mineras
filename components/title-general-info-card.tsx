@@ -1,3 +1,4 @@
+import { formatDateDisplay } from "@/lib/format-date";
 import type { MiningTitleRecord } from "@/types/titles";
 
 function hasValue(value?: string | null) {
@@ -50,7 +51,7 @@ export function TitleGeneralInfoCard({
 
   return (
     <div
-      className={`grid gap-3 ${
+      className={`grid gap-4 ${
         hasSubcontractor ? "xl:grid-cols-3" : "xl:grid-cols-2"
       }`}
     >
@@ -133,12 +134,20 @@ export function TitleGeneralInfoCard({
           <DataLine label="Área otorgada" value={title.granted_area} />
           <DataLine
             label="Fecha inscripción RMN"
-            value={title.rmn_registration_date}
+            value={
+              title.rmn_registration_date
+                ? formatDateDisplay(title.rmn_registration_date)
+                : null
+            }
           />
           <DataLine label="Etapa contractual" value={title.contract_stage} />
           <DataLine
             label="Fecha inscripción RMN - Subcontrato"
-            value={title.subcontract_rmn_registration_date}
+            value={
+              title.subcontract_rmn_registration_date
+                ? formatDateDisplay(title.subcontract_rmn_registration_date)
+                : null
+            }
           />
           <DataLine label="Anualidad" value={title.annuality} />
         </div>

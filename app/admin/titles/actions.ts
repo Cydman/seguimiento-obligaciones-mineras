@@ -10,6 +10,18 @@ function normalizeText(value: FormDataEntryValue | null) {
   return text ? text : null;
 }
 
+function normalizeCode(value: FormDataEntryValue | null) {
+  return String(value ?? "")
+    .trim()
+    .toUpperCase();
+}
+
+function normalizeDateValue(value: FormDataEntryValue | null) {
+  const text = String(value ?? "").trim();
+  if (!text) return null;
+  return text.slice(0, 10);
+}
+
 export async function createTitleAction(formData: FormData) {
   const { user, profile } = await getCurrentProfile();
 
@@ -19,7 +31,7 @@ export async function createTitleAction(formData: FormData) {
   }
 
   const organizationId = String(formData.get("organization_id") ?? "").trim();
-  const code = String(formData.get("code") ?? "").trim();
+  const code = normalizeCode(formData.get("code"));
   const name = String(formData.get("name") ?? "").trim();
   const mineral = String(formData.get("mineral") ?? "").trim();
   const municipality = String(formData.get("municipality") ?? "").trim();
@@ -56,9 +68,9 @@ export async function createTitleAction(formData: FormData) {
     village: normalizeText(formData.get("village")),
     title_modality: normalizeText(formData.get("title_modality")),
     granted_area: normalizeText(formData.get("granted_area")),
-    rmn_registration_date: normalizeText(formData.get("rmn_registration_date")),
+    rmn_registration_date: normalizeDateValue(formData.get("rmn_registration_date")),
     contract_stage: normalizeText(formData.get("contract_stage")),
-    subcontract_rmn_registration_date: normalizeText(
+    subcontract_rmn_registration_date: normalizeDateValue(
       formData.get("subcontract_rmn_registration_date")
     ),
     annuality: normalizeText(formData.get("annuality")),
@@ -85,7 +97,7 @@ export async function updateTitleAction(formData: FormData) {
 
   const titleId = String(formData.get("title_id") ?? "").trim();
   const organizationId = String(formData.get("organization_id") ?? "").trim();
-  const code = String(formData.get("code") ?? "").trim();
+  const code = normalizeCode(formData.get("code"));
   const name = String(formData.get("name") ?? "").trim();
   const mineral = String(formData.get("mineral") ?? "").trim();
   const municipality = String(formData.get("municipality") ?? "").trim();
@@ -124,9 +136,9 @@ export async function updateTitleAction(formData: FormData) {
       village: normalizeText(formData.get("village")),
       title_modality: normalizeText(formData.get("title_modality")),
       granted_area: normalizeText(formData.get("granted_area")),
-      rmn_registration_date: normalizeText(formData.get("rmn_registration_date")),
+      rmn_registration_date: normalizeDateValue(formData.get("rmn_registration_date")),
       contract_stage: normalizeText(formData.get("contract_stage")),
-      subcontract_rmn_registration_date: normalizeText(
+      subcontract_rmn_registration_date: normalizeDateValue(
         formData.get("subcontract_rmn_registration_date")
       ),
       annuality: normalizeText(formData.get("annuality")),

@@ -1,4 +1,5 @@
 import { updateTitleAction } from "@/app/admin/titles/actions";
+import { formatDateDisplay } from "@/lib/format-date";
 import type { MiningTitleRecord } from "@/types/titles";
 
 interface OrganizationOption {
@@ -32,11 +33,12 @@ export function AdminTitlesTable({
 }: AdminTitlesTableProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
-      <div className="grid grid-cols-[1fr_1.4fr_1.4fr_1fr_1fr_auto] gap-3 border-b border-slate-800 bg-slate-800/70 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-300">
+      <div className="grid grid-cols-[1fr_1.4fr_1.3fr_1fr_1fr_1fr_auto] gap-3 border-b border-slate-800 bg-slate-800/70 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-300">
         <div>Placa</div>
         <div>Organización</div>
         <div>Mina / referencia</div>
         <div>Municipio</div>
+        <div>Fecha RMN</div>
         <div>Estado</div>
         <div>Acción</div>
       </div>
@@ -48,13 +50,14 @@ export function AdminTitlesTable({
       ) : (
         titles.map((title) => (
           <details key={title.id} className="border-t border-slate-800">
-            <summary className="grid cursor-pointer list-none grid-cols-[1fr_1.4fr_1.4fr_1fr_1fr_auto] gap-3 px-4 py-3 text-sm text-slate-200">
+            <summary className="grid cursor-pointer list-none grid-cols-[1fr_1.4fr_1.3fr_1fr_1fr_1fr_auto] gap-3 px-4 py-3 text-sm text-slate-200">
               <div>{title.code}</div>
               <div className="truncate">
                 {getOrganizationName(title.organization_id, organizations)}
               </div>
               <div className="truncate">{title.mine_name || title.name}</div>
               <div>{title.municipality}</div>
+              <div>{formatDateDisplay(title.rmn_registration_date)}</div>
               <div>{title.is_active ? "Activo" : "Inactivo"}</div>
               <div>
                 <span className="rounded-xl border border-slate-700 px-3 py-1.5 text-xs font-medium text-white">
@@ -67,7 +70,7 @@ export function AdminTitlesTable({
               <form action={updateTitleAction} className="space-y-8">
                 <input type="hidden" name="title_id" value={title.id} />
 
-                <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-300">
                       Organización
@@ -85,36 +88,65 @@ export function AdminTitlesTable({
                     </select>
                   </div>
 
-                  <input
-                    name="code"
-                    defaultValue={title.code}
-                    className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
-                  />
-                  <input
-                    name="name"
-                    defaultValue={title.name}
-                    className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
-                  />
-                  <input
-                    name="mineral"
-                    defaultValue={title.mineral}
-                    className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
-                  />
-                  <input
-                    name="municipality"
-                    defaultValue={title.municipality}
-                    className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
-                  />
-                  <input
-                    name="department"
-                    defaultValue={title.department}
-                    className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
-                  />
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">
+                      Placa / título
+                    </label>
+                    <input
+                      name="code"
+                      defaultValue={title.code}
+                      className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 uppercase text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">
+                      Nombre de referencia
+                    </label>
+                    <input
+                      name="name"
+                      defaultValue={title.name}
+                      className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">
+                      Mineral
+                    </label>
+                    <input
+                      name="mineral"
+                      defaultValue={title.mineral}
+                      className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">
+                      Municipio
+                    </label>
+                    <input
+                      name="municipality"
+                      defaultValue={title.municipality}
+                      className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">
+                      Departamento
+                    </label>
+                    <input
+                      name="department"
+                      defaultValue={title.department}
+                      className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+                    />
+                  </div>
                 </section>
 
                 <section>
                   <h3 className="text-lg font-semibold">Titular</h3>
-                  <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                     <input
                       name="holder_name"
                       defaultValue={title.holder_name ?? ""}
@@ -143,14 +175,14 @@ export function AdminTitlesTable({
                       name="holder_address"
                       defaultValue={title.holder_address ?? ""}
                       placeholder="Dirección"
-                      className="min-h-24 rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white md:col-span-2 lg:col-span-3"
+                      className="min-h-24 rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white md:col-span-2 xl:col-span-3"
                     />
                   </div>
                 </section>
 
                 <section>
                   <h3 className="text-lg font-semibold">Subcontratista</h3>
-                  <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                     <input
                       name="subcontractor_name"
                       defaultValue={title.subcontractor_name ?? ""}
@@ -179,14 +211,14 @@ export function AdminTitlesTable({
                       name="subcontractor_address"
                       defaultValue={title.subcontractor_address ?? ""}
                       placeholder="Dirección"
-                      className="min-h-24 rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white md:col-span-2 lg:col-span-3"
+                      className="min-h-24 rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white md:col-span-2 xl:col-span-3"
                     />
                   </div>
                 </section>
 
                 <section>
                   <h3 className="text-lg font-semibold">Información del título</h3>
-                  <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                     <input
                       name="mine_name"
                       defaultValue={title.mine_name ?? ""}
@@ -235,6 +267,9 @@ export function AdminTitlesTable({
                         defaultValue={normalizeDateInput(title.rmn_registration_date)}
                         className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
                       />
+                      <p className="mt-2 text-xs text-slate-400">
+                        Vista actual: {formatDateDisplay(title.rmn_registration_date)}
+                      </p>
                     </div>
 
                     <div>
@@ -250,6 +285,9 @@ export function AdminTitlesTable({
                         )}
                         className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
                       />
+                      <p className="mt-2 text-xs text-slate-400">
+                        Vista actual: {formatDateDisplay(title.subcontract_rmn_registration_date)}
+                      </p>
                     </div>
 
                     <div>

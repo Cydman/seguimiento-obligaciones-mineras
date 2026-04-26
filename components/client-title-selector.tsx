@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { MiningTitleRecord } from "@/types/titles";
 
@@ -13,8 +14,14 @@ export function ClientTitleSelector({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  if (titles.length === 1) {
-    const onlyTitle = titles[0];
+  const sortedTitles = useMemo(
+    () =>
+      [...titles].sort((a, b) => a.code.localeCompare(b.code, "es-CO")),
+    [titles]
+  );
+
+  if (sortedTitles.length === 1) {
+    const onlyTitle = sortedTitles[0];
 
     return (
       <div className="rounded-2xl border border-slate-800 bg-slate-900 px-5 py-4">
@@ -42,16 +49,27 @@ export function ClientTitleSelector({
 
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900 px-5 py-4">
-      <label className="mb-2 block text-sm font-medium text-slate-400">
-        Placa del título
-      </label>
+      <div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-400">
+            Placa del título
+          </label>
+          <p className="text-xs text-slate-500">
+            Este es el filtro principal para consultar la información del cliente.
+          </p>
+        </div>
+
+        <p className="text-sm text-slate-400">
+          {sortedTitles.length} título(s) disponible(s)
+        </p>
+      </div>
 
       <select
         value={selectedTitle}
         onChange={(e) => handleChange(e.target.value)}
-        className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
+        className="mt-3 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
       >
-        {titles.map((title) => (
+        {sortedTitles.map((title) => (
           <option key={title.id} value={title.id}>
             {title.code} - {title.mine_name || title.name}
           </option>
