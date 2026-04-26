@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentProfile } from "@/modules/auth/get-current-profile";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   const { user, profile } = await getCurrentProfile();
@@ -11,6 +11,9 @@ export async function GET(
   if (!user || !profile || !profile.is_active) {
     return new NextResponse("No autorizado", { status: 401 });
   }
+
+  const url = new URL(request.url);
+  const inlineView = url.searchParams.get("view") === "1";
 
   const { id } = await context.params;
   const adminClient = createAdminClient();
@@ -59,7 +62,7 @@ export async function GET(
   return new NextResponse(fileData, {
     headers: {
       "Content-Type": activity.attachment_mime || "application/pdf",
-      "Content-Disposition": `attachment; filename="${encodeURIComponent(
+      "Content-Disposition": `${inlineView ? "inline" : "attachment"}; filename="${encodeURIComponent(
         activity.attachment_name || "archivo.pdf"
       )}"`,
     },

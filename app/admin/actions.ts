@@ -13,6 +13,10 @@ function sanitizeFileName(fileName: string) {
     .replace(/_+/g, "_");
 }
 
+function withFlag(path: string, flag: string) {
+  return path.includes("?") ? `${path}&${flag}=1` : `${path}?${flag}=1`;
+}
+
 async function logObligationActivity({
   obligationId,
   actorProfileId,
@@ -262,6 +266,10 @@ export async function uploadObligationDocumentAction(formData: FormData) {
     throw new Error("Debes seleccionar un archivo.");
   }
 
+  if (!file.name.toLowerCase().endsWith(".pdf")) {
+    throw new Error("Solo se permiten archivos PDF.");
+  }
+
   if (file.size > 10 * 1024 * 1024) {
     throw new Error("El archivo no puede superar 10 MB.");
   }
@@ -315,7 +323,7 @@ export async function uploadObligationDocumentAction(formData: FormData) {
     obligationId,
     actorProfileId: user.id,
     action: "document_uploaded",
-    note: "Documento cargado en la obligación.",
+    note: "Documento base cargado en la obligación.",
     payload: {
       file_name: file.name,
       file_size: file.size,
@@ -326,4 +334,62 @@ export async function uploadObligationDocumentAction(formData: FormData) {
   revalidatePath(`/admin/obligations/${obligationId}`);
   revalidatePath(`/client/obligations/${obligationId}`);
   redirect(`/admin/obligations/${obligationId}?uploaded=1`);
+}
+
+export async function removeObligationDocumentAction(formData: FormData) {
+  const { user, profile } = await getCurrentProfile();
+
+  if (!user) redirect("/login");
+  if (!profile || profile.role !== "admin" || !profile.is_active) {
+    redirect("/client");
+  }
+
+  const documentId = String(formData.get("document_id") ?? "").trim();
+  const returnPath = String(formData.get("return_path") ?? "").trim() || "/admin";
+
+  if (!documentId) {
+    throw new Error("No se recibió el documento.");
+  }
+
+  const adminClient = createAdminClient();
+
+  const { data: current, error: currentError } = await adminClient
+    .from("obligation_documents")
+    .select("id, obligation_id, storage_path, file_name")
+    .eq("id", documentId)
+    .maybeSingle();
+
+  if (currentError || !current) {
+    throw new Error("No fue posible identificar el documento.");
+  }
+
+  const { error: removeError } = await adminClient.storage
+    .from("obligation-documents")
+    .remove([current.storage_path]);
+
+  if (removeError) {
+    throw new Error(`Error eliminando archivo del storage: ${removeError.message}`);
+  }
+
+  const { error: deleteError } = await adminClient
+    .from("obligation_documents")
+    .delete()
+    .eq("id", documentId);
+
+  if (deleteError) {
+    throw new Error(`Error eliminando documento: ${deleteError.message}`);
+  }
+
+  await logObligationActivity({
+    obligationId: current.obligation_id,
+    actorProfileId: user.id,
+    action: "document_deleted",
+    note: "Documento base eliminado de la obligación.",
+    payload: {
+      file_name: current.file_name,
+    },
+  });
+
+  revalidatePath(returnPath);
+  redirect(withFlag(returnPath, "document_deleted"));
 }

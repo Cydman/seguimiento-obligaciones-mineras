@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AdminEditObligationForm } from "@/components/admin-edit-obligation-form";
 import { ObligationActivityPanel } from "@/components/obligation-activity-panel";
+import { ObligationBaseDocumentsList } from "@/components/obligation-base-documents-list";
 import { ObligationDetailCard } from "@/components/obligation-detail-card";
 import { PageShell } from "@/components/page-shell";
 import { UploadObligationDocumentForm } from "@/components/upload-obligation-document-form";
@@ -15,6 +16,7 @@ export default async function AdminObligationDetailPage({
   searchParams: Promise<{
     updated?: string;
     uploaded?: string;
+    document_deleted?: string;
     activity_saved?: string;
     activity_updated?: string;
     activity_deleted?: string;
@@ -30,7 +32,7 @@ export default async function AdminObligationDetailPage({
   }
 
   const { id } = await params;
-  const { obligation, logs, assignableProfiles } =
+  const { obligation, logs, assignableProfiles, documents } =
     await getObligationAdminDetail(id);
 
   if (!obligation) {
@@ -40,45 +42,53 @@ export default async function AdminObligationDetailPage({
   return (
     <PageShell
       title="Detalle de obligación"
-      description="Consulta, edita y gestiona el historial manual de actuaciones y documentos base."
+      description="Consulta, edita y gestiona el historial manual de actuaciones y los documentos base de la obligación."
     >
-      {query.updated === "1" ? (
-        <div className="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
-          Obligación actualizada correctamente.
-        </div>
-      ) : null}
+      <div className="space-y-4">
+        {query.updated === "1" ? (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
+            Obligación actualizada correctamente.
+          </div>
+        ) : null}
 
-      {query.uploaded === "1" ? (
-        <div className="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
-          Documento base cargado correctamente.
-        </div>
-      ) : null}
+        {query.uploaded === "1" ? (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
+            Documento base cargado correctamente.
+          </div>
+        ) : null}
 
-      {query.activity_saved === "1" ? (
-        <div className="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
-          Actuación guardada correctamente.
-        </div>
-      ) : null}
+        {query.document_deleted === "1" ? (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
+            Documento base eliminado correctamente.
+          </div>
+        ) : null}
 
-      {query.activity_updated === "1" ? (
-        <div className="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
-          Actuación actualizada correctamente.
-        </div>
-      ) : null}
+        {query.activity_saved === "1" ? (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
+            Actuación guardada correctamente.
+          </div>
+        ) : null}
 
-      {query.activity_deleted === "1" ? (
-        <div className="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
-          Actuación eliminada correctamente.
-        </div>
-      ) : null}
+        {query.activity_updated === "1" ? (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
+            Actuación actualizada correctamente.
+          </div>
+        ) : null}
 
-      {query.attachment_removed === "1" ? (
-        <div className="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
-          PDF eliminado correctamente.
-        </div>
-      ) : null}
+        {query.activity_deleted === "1" ? (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
+            Actuación eliminada correctamente.
+          </div>
+        ) : null}
 
-      <div className="space-y-6">
+        {query.attachment_removed === "1" ? (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
+            PDF eliminado correctamente.
+          </div>
+        ) : null}
+      </div>
+
+      <div className="mt-4 space-y-6">
         <ObligationDetailCard obligation={obligation} backHref="/admin" />
 
         <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
@@ -95,7 +105,14 @@ export default async function AdminObligationDetailPage({
           </details>
         </div>
 
-        <UploadObligationDocumentForm obligationId={obligation.id} />
+        <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
+          <UploadObligationDocumentForm obligationId={obligation.id} />
+
+          <ObligationBaseDocumentsList
+            documents={documents}
+            returnPath={`/admin/obligations/${obligation.id}`}
+          />
+        </div>
 
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold">Historial de actuaciones</h2>
