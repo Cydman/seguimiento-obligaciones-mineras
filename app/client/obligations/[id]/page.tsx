@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { ObligationActivityPanel } from "@/components/obligation-activity-panel";
+import { ObligationBaseDocumentsReadonly } from "@/components/obligation-base-documents-readonly";
 import { ObligationDetailCard } from "@/components/obligation-detail-card";
 import { PageShell } from "@/components/page-shell";
 import { getCurrentProfile } from "@/modules/auth/get-current-profile";
@@ -21,7 +22,7 @@ export default async function ClientObligationDetailPage({
   }
 
   const { id } = await params;
-  const { obligation, logs } = await getObligationDetail(profile, id);
+  const { obligation, logs, documents } = await getObligationDetail(profile, id);
 
   if (!obligation) {
     redirect("/client");
@@ -30,10 +31,12 @@ export default async function ClientObligationDetailPage({
   return (
     <PageShell
       title="Detalle de obligación"
-      description="Consulta la información general y el historial visible de actuaciones."
+      description="Consulta la información general, los documentos base y el historial visible de actuaciones."
     >
       <div className="space-y-6">
         <ObligationDetailCard obligation={obligation} backHref="/client" />
+
+        <ObligationBaseDocumentsReadonly documents={documents} />
 
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold">Historial de actuaciones</h2>
