@@ -85,8 +85,8 @@ export default async function SpecialistPage({
                 </h2>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
                   Desde aquí puedes consultar las obligaciones asignadas por temática,
-                  revisar su estado, aplicar filtros rápidos y registrar actuaciones en las
-                  obligaciones que gestionas. La vista de obligaciones concentra la tabla principal.
+                  revisar su estado, aplicar filtros rápidos y registrar actuaciones
+                  en las obligaciones que gestionas.
                 </p>
 
                 <div className="mt-5">
@@ -107,8 +107,8 @@ export default async function SpecialistPage({
                   {formatSpecialty(profile.specialty)}
                 </p>
                 <p className="mt-3 text-sm text-slate-400">
-                  Las obligaciones visibles en este portal se filtran por tu especialidad
-                  o por aquellas que te hayan sido asignadas directamente.
+                  Las obligaciones visibles se filtran por tu especialidad
+                  o por asignación directa.
                 </p>
               </div>
             </div>
@@ -121,7 +121,7 @@ export default async function SpecialistPage({
               searchText={params.q ?? ""}
             />
 
-            <section className="rounded-2xl border border-slate-800 bg-slate-900 p-4" id="obligaciones">
+            <section className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
               <div className="mb-4 flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between">
                 <h2 className="text-xl font-semibold">
                   Obligaciones asignadas por temática

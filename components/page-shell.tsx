@@ -123,14 +123,14 @@ export function PageShell({ title, description, children }: PageShellProps) {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="flex min-h-screen">
-        <aside className="hidden w-72 shrink-0 border-r border-slate-800 bg-slate-950/90 xl:flex xl:flex-col">
-          <div className="border-b border-slate-800 px-5 py-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-emerald-300">
+        <aside className="hidden w-72 shrink-0 border-r border-slate-800/80 bg-slate-950/95 xl:flex xl:flex-col">
+          <div className="border-b border-slate-800/80 px-5 py-5">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-emerald-300">
               Seguimiento minero
             </p>
             <h1 className="mt-2 text-xl font-bold text-white">Panel web</h1>
-            <p className="mt-1 text-sm text-slate-400">
-              Gestión centralizada de obligaciones y usuarios.
+            <p className="mt-1 text-sm leading-6 text-slate-400">
+              Gestión centralizada de obligaciones, títulos y usuarios.
             </p>
           </div>
 
@@ -143,30 +143,33 @@ export function PageShell({ title, description, children }: PageShellProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition ${
+                  className={`group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition ${
                     active
-                      ? "bg-emerald-500 text-slate-950"
+                      ? "bg-emerald-500 text-slate-950 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]"
                       : "text-slate-200 hover:bg-slate-900 hover:text-white"
                   }`}
                 >
-                  <Icon size={18} />
+                  <Icon
+                    size={18}
+                    className={active ? "opacity-100" : "opacity-80 group-hover:opacity-100"}
+                  />
                   <span>{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
-          <div className="border-t border-slate-800 px-4 py-4">
+          <div className="border-t border-slate-800/80 px-4 py-4">
             <LogoutButton />
           </div>
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/90 backdrop-blur">
+          <header className="sticky top-0 z-20 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur">
             <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-6 py-4">
               <div className="min-w-0">
                 <h1 className="truncate text-2xl font-bold">{title}</h1>
-                <p className="mt-1 truncate text-sm text-slate-400">
+                <p className="mt-1 max-w-4xl truncate text-sm text-slate-400">
                   {description}
                 </p>
               </div>
@@ -193,7 +196,7 @@ export function PageShell({ title, description, children }: PageShellProps) {
           </header>
 
           <section className="mx-auto w-full max-w-[1600px] flex-1 px-6 py-6">
-            {children}
+            <div className="space-y-5">{children}</div>
           </section>
         </div>
       </div>

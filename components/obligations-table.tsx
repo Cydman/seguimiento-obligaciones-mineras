@@ -27,12 +27,6 @@ function formatCategory(category: string) {
 
 function formatAuthority(authority: string) {
   switch (authority) {
-    case "ANM":
-      return "ANM";
-    case "ANLA":
-      return "ANLA";
-    case "CAR":
-      return "CAR";
     case "MUNICIPIO":
       return "Municipio";
     case "OTRA":
@@ -60,7 +54,7 @@ export function ObligationsTable({
   basePath = "/client",
 }: ObligationsTableProps) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+    <div className="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900">
       <div className="overflow-x-auto">
         <table className="min-w-full text-left text-sm">
           <thead className="bg-slate-800/70 text-slate-300">
@@ -75,31 +69,48 @@ export function ObligationsTable({
             </tr>
           </thead>
           <tbody>
-            {obligations.map((obligation) => (
-              <tr
-                key={obligation.id}
-                className="border-t border-slate-800 text-slate-200"
-              >
-                <td className="px-4 py-3">
-                  <Link
-                    href={`${basePath}/obligations/${obligation.id}`}
-                    className="font-medium text-emerald-300 hover:underline"
-                  >
-                    {obligation.code}
-                  </Link>
-                </td>
-                <td className="px-4 py-3">{obligation.name}</td>
-                <td className="px-4 py-3">{formatCategory(obligation.category)}</td>
-                <td className="px-4 py-3">{formatAuthority(obligation.authority)}</td>
-                <td className="px-4 py-3">{formatPriority(obligation.priority)}</td>
-                <td className="px-4 py-3">
-                  {formatDateDisplay(obligation.dueDate)}
-                </td>
-                <td className="px-4 py-3">
-                  <StatusBadge status={obligation.status} />
+            {obligations.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="px-4 py-10 text-center text-sm text-slate-400"
+                >
+                  No hay obligaciones para los filtros seleccionados.
                 </td>
               </tr>
-            ))}
+            ) : (
+              obligations.map((obligation) => (
+                <tr
+                  key={obligation.id}
+                  className="border-t border-slate-800 text-slate-200"
+                >
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <Link
+                      href={`${basePath}/obligations/${obligation.id}`}
+                      className="font-medium text-emerald-300 hover:underline"
+                    >
+                      {obligation.code}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 min-w-[260px]">{obligation.name}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {formatCategory(obligation.category)}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {formatAuthority(obligation.authority)}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {formatPriority(obligation.priority)}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {formatDateDisplay(obligation.dueDate)}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <StatusBadge status={obligation.status} />
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

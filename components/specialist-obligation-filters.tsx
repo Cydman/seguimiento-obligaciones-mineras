@@ -8,7 +8,7 @@ export function SpecialistObligationFilters({
   searchText?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 px-4 py-4">
+    <div className="rounded-2xl border border-slate-800/80 bg-slate-900 px-4 py-4">
       <form
         method="GET"
         className="grid gap-3 xl:grid-cols-[1fr_1fr_1.4fr_auto_auto]"

@@ -63,7 +63,7 @@ export default async function ClientPage({ searchParams }: ClientPageProps) {
       ) : null}
 
       {titles.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="grid gap-4 xl:grid-cols-[1.2fr_auto] xl:items-start">
             <ClientTitleSelector
               titles={titles}
@@ -81,7 +81,7 @@ export default async function ClientPage({ searchParams }: ClientPageProps) {
               </div>
             )
           ) : (
-            <div className="space-y-4">
+            <>
               <div className="grid gap-3 md:grid-cols-3">
                 <StatCard
                   title="Próximas"
@@ -101,7 +101,7 @@ export default async function ClientPage({ searchParams }: ClientPageProps) {
               </div>
 
               <section className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
-                <div className="mb-3 flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between">
+                <div className="mb-4 flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between">
                   <h2 className="text-xl font-semibold">
                     Obligaciones del título
                   </h2>
@@ -121,7 +121,7 @@ export default async function ClientPage({ searchParams }: ClientPageProps) {
                   <ObligationsTable obligations={obligations} basePath="/client" />
                 </div>
               </section>
-            </div>
+            </>
           )}
         </div>
       ) : (
