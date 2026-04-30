@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   Building2,
   ClipboardList,
@@ -19,32 +19,105 @@ interface PageShellProps {
   children: ReactNode;
 }
 
-function getNavItems(pathname: string) {
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  isActive: (pathname: string, searchParams: URLSearchParams) => boolean;
+}
+
+function getNavItems(pathname: string): NavItem[] {
   if (pathname.startsWith("/admin")) {
     return [
-      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/admin", label: "Obligaciones", icon: ClipboardList },
-      { href: "/admin/users", label: "Usuarios", icon: Users },
-      { href: "/admin/organizations", label: "Organizaciones", icon: Building2 },
-      { href: "/admin/titles", label: "Títulos", icon: ScrollText },
+      {
+        href: "/admin",
+        label: "Dashboard",
+        icon: LayoutDashboard,
+        isActive: (currentPath, searchParams) =>
+          currentPath === "/admin" && searchParams.get("section") !== "obligations",
+      },
+      {
+        href: "/admin?section=obligations",
+        label: "Obligaciones",
+        icon: ClipboardList,
+        isActive: (currentPath, searchParams) =>
+          currentPath === "/admin" && searchParams.get("section") === "obligations",
+      },
+      {
+        href: "/admin/users",
+        label: "Usuarios",
+        icon: Users,
+        isActive: (currentPath) =>
+          currentPath === "/admin/users" || currentPath.startsWith("/admin/users/"),
+      },
+      {
+        href: "/admin/organizations",
+        label: "Organizaciones",
+        icon: Building2,
+        isActive: (currentPath) =>
+          currentPath === "/admin/organizations" ||
+          currentPath.startsWith("/admin/organizations/"),
+      },
+      {
+        href: "/admin/titles",
+        label: "Títulos",
+        icon: ScrollText,
+        isActive: (currentPath) =>
+          currentPath === "/admin/titles" || currentPath.startsWith("/admin/titles/"),
+      },
     ];
   }
 
   if (pathname.startsWith("/specialist")) {
     return [
-      { href: "/specialist", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/specialist", label: "Obligaciones", icon: ClipboardList },
+      {
+        href: "/specialist?view=general",
+        label: "Dashboard",
+        icon: LayoutDashboard,
+        isActive: (currentPath, searchParams) =>
+          currentPath === "/specialist" &&
+          (searchParams.get("view") === "general" || !searchParams.get("view")),
+      },
+      {
+        href: "/specialist?view=obligations",
+        label: "Obligaciones",
+        icon: ClipboardList,
+        isActive: (currentPath, searchParams) =>
+          currentPath === "/specialist/obligations" ||
+          currentPath.startsWith("/specialist/obligations/") ||
+          (currentPath === "/specialist" && searchParams.get("view") === "obligations"),
+      },
     ];
   }
 
-  return [
-    { href: "/client", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/client", label: "Obligaciones", icon: ClipboardList },
-  ];
+  if (pathname.startsWith("/client")) {
+    return [
+      {
+        href: "/client?view=general",
+        label: "Dashboard",
+        icon: LayoutDashboard,
+        isActive: (currentPath, searchParams) =>
+          currentPath === "/client" &&
+          (searchParams.get("view") === "general" || !searchParams.get("view")),
+      },
+      {
+        href: "/client?view=obligations",
+        label: "Obligaciones",
+        icon: ClipboardList,
+        isActive: (currentPath, searchParams) =>
+          currentPath === "/client/obligations" ||
+          currentPath.startsWith("/client/obligations/") ||
+          (currentPath === "/client" && searchParams.get("view") === "obligations"),
+      },
+    ];
+  }
+
+  return [];
 }
 
 export function PageShell({ title, description, children }: PageShellProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const navItems = getNavItems(pathname);
 
   return (
@@ -63,8 +136,7 @@ export function PageShell({ title, description, children }: PageShellProps) {
 
           <nav className="flex-1 space-y-2 px-4 py-5">
             {navItems.map((item) => {
-              const active =
-                pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const active = item.isActive(pathname, searchParams);
               const Icon = item.icon;
 
               return (

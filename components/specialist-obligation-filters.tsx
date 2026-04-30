@@ -8,14 +8,21 @@ export function SpecialistObligationFilters({
   searchText?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-      <form method="GET" className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="rounded-2xl border border-slate-800 bg-slate-900 px-4 py-4">
+      <form
+        method="GET"
+        className="grid gap-3 xl:grid-cols-[1fr_1fr_1.4fr_auto_auto]"
+      >
+        <input type="hidden" name="view" value="obligations" />
+
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">Estado</label>
+          <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-400">
+            Estado
+          </label>
           <select
             name="status"
             defaultValue={selectedStatus}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-emerald-500"
           >
             <option value="">Todos</option>
             <option value="pendiente">Pendiente</option>
@@ -26,11 +33,13 @@ export function SpecialistObligationFilters({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">Autoridad</label>
+          <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-400">
+            Autoridad
+          </label>
           <select
             name="authority"
             defaultValue={selectedAuthority}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-emerald-500"
           >
             <option value="">Todas</option>
             <option value="ANM">ANM</option>
@@ -42,30 +51,30 @@ export function SpecialistObligationFilters({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">Buscar</label>
+          <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-400">
+            Buscar
+          </label>
           <input
             name="q"
             defaultValue={searchText}
             placeholder="Código o nombre"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-500"
           />
         </div>
 
-        <div className="flex items-end gap-3">
-          <button
-            type="submit"
-            className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-slate-950"
-          >
-            Filtrar
-          </button>
+        <button
+          type="submit"
+          className="self-end rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
+        >
+          Filtrar
+        </button>
 
-          <a
-            href="/specialist"
-            className="rounded-xl border border-slate-700 px-5 py-3 font-semibold text-white"
-          >
-            Limpiar
-          </a>
-        </div>
+        <a
+          href="/specialist?view=obligations"
+          className="self-end rounded-xl border border-slate-700 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:border-slate-500"
+        >
+          Limpiar
+        </a>
       </form>
     </div>
   );
