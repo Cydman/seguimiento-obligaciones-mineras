@@ -19,11 +19,11 @@ export function ClientPortalTabs({
   }
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-1.5">
+    <div className="rounded-2xl border border-slate-800/80 bg-slate-900 p-1.5">
       <div className="flex flex-wrap gap-2">
         <Link
           href={buildHref("general")}
-          className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+          className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
             currentView === "general"
               ? "bg-emerald-500 text-slate-950"
               : "border border-slate-700 text-white hover:border-slate-500"
@@ -34,7 +34,7 @@ export function ClientPortalTabs({
 
         <Link
           href={buildHref("obligations")}
-          className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+          className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
             currentView === "obligations"
               ? "bg-emerald-500 text-slate-950"
               : "border border-slate-700 text-white hover:border-slate-500"

@@ -53,7 +53,7 @@ export function CreateObligationForm({
 
   return (
     <form action={createObligationAction} className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
             Organización
@@ -148,8 +148,8 @@ export function CreateObligationForm({
             <option value="ANM">ANM</option>
             <option value="ANLA">ANLA</option>
             <option value="CAR">CAR</option>
-            <option value="MUNICIPIO">MUNICIPIO</option>
-            <option value="OTRA">OTRA</option>
+            <option value="MUNICIPIO">Municipio</option>
+            <option value="OTRA">Otra</option>
           </select>
         </div>
 
@@ -202,7 +202,7 @@ export function CreateObligationForm({
           </p>
         </div>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 xl:col-span-3">
           <label className="mb-2 block text-sm font-medium text-slate-300">
             Nombre de la obligación
           </label>
@@ -215,7 +215,7 @@ export function CreateObligationForm({
           />
         </div>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 xl:col-span-3">
           <label className="mb-2 block text-sm font-medium text-slate-300">
             Descripción
           </label>
@@ -228,7 +228,7 @@ export function CreateObligationForm({
           />
         </div>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 xl:col-span-3">
           <label className="mb-2 block text-sm font-medium text-slate-300">
             Fundamento jurídico o técnico
           </label>

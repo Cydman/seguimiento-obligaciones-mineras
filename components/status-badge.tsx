@@ -5,10 +5,10 @@ interface StatusBadgeProps {
 }
 
 const statusStyles: Record<ObligationStatus, string> = {
-  pendiente: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-  en_proceso: "bg-sky-500/15 text-sky-300 border-sky-500/30",
-  cumplida: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-  vencida: "bg-red-500/15 text-red-300 border-red-500/30",
+  pendiente: "border-amber-500/30 bg-amber-500/15 text-amber-300",
+  en_proceso: "border-sky-500/30 bg-sky-500/15 text-sky-300",
+  cumplida: "border-emerald-500/30 bg-emerald-500/15 text-emerald-300",
+  vencida: "border-red-500/30 bg-red-500/15 text-red-300",
 };
 
 const statusLabels: Record<ObligationStatus, string> = {
@@ -21,7 +21,7 @@ const statusLabels: Record<ObligationStatus, string> = {
 export function StatusBadge({ status }: StatusBadgeProps) {
   return (
     <span
-      className={`inline-flex rounded-full border px-3 py-1 text-sm font-medium ${statusStyles[status]}`}
+      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold tracking-wide ${statusStyles[status]}`}
     >
       {statusLabels[status]}
     </span>
