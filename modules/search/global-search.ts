@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { Profile } from "@/types/auth";
 import { mapObligationRow } from "@/modules/obligations/map-obligation";
+import type { Profile } from "@/types/auth";
 
 interface SearchResultOrganization {
   id: string;
@@ -67,27 +67,32 @@ export async function globalSearch(profile: Profile, rawQuery: string) {
   }
 
   if (profile.role === "admin") {
-    const [{ data: titles, error: titlesError }, { data: organizations, error: orgError }, { data: users, error: usersError }] =
-      await Promise.all([
-        adminClient
-          .from("mining_titles")
-          .select("id, code, name, mine_name, organization_id, is_active")
-          .or(`code.ilike.%${q}%,name.ilike.%${q}%,mine_name.ilike.%${q}%`)
-          .order("code")
-          .limit(10),
-        adminClient
-          .from("organizations")
-          .select("id, name, document_number, is_active")
-          .or(`name.ilike.%${q}%,document_number.ilike.%${q}%`)
-          .order("name")
-          .limit(10),
-        adminClient
-          .from("profiles")
-          .select("id, full_name, email, role, is_active, organization_id")
-          .or(`full_name.ilike.%${q}%,email.ilike.%${q}%`)
-          .order("created_at", { ascending: false })
-          .limit(10),
-      ]);
+    const [
+      { data: titles, error: titlesError },
+      { data: organizations, error: orgError },
+      { data: users, error: usersError },
+    ] = await Promise.all([
+      adminClient
+        .from("mining_titles")
+        .select("id, code, name, mine_name, organization_id, is_active")
+        .or(`code.ilike.%${q}%,name.ilike.%${q}%,mine_name.ilike.%${q}%`)
+        .order("code")
+        .limit(10),
+
+      adminClient
+        .from("organizations")
+        .select("id, name, document_number, is_active")
+        .or(`name.ilike.%${q}%,document_number.ilike.%${q}%`)
+        .order("name")
+        .limit(10),
+
+      adminClient
+        .from("profiles")
+        .select("id, full_name, email, role, is_active, organization_id")
+        .or(`full_name.ilike.%${q}%,email.ilike.%${q}%`)
+        .order("created_at", { ascending: false })
+        .limit(10),
+    ]);
 
     if (titlesError) {
       throw new Error(`Error consultando títulos: ${titlesError.message}`);
