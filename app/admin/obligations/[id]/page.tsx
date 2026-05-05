@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminEditObligationForm } from "@/components/admin-edit-obligation-form";
 import { ObligationActivityPanel } from "@/components/obligation-activity-panel";
@@ -42,9 +43,9 @@ export default async function AdminObligationDetailPage({
   return (
     <PageShell
       title="Detalle de obligación"
-      description="Consulta, edita y gestiona el historial manual de actuaciones y los documentos base de la obligación."
+      description="Consulta y gestiona la obligación priorizando el historial reciente de actuaciones."
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
         {query.updated === "1" ? (
           <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-200">
             Obligación actualizada correctamente.
@@ -88,42 +89,68 @@ export default async function AdminObligationDetailPage({
         ) : null}
       </div>
 
-      <div className="mt-4 space-y-6">
-        <ObligationDetailCard obligation={obligation} backHref="/admin" />
+      <div className="flex justify-end">
+        <Link
+          href="/admin?section=obligations"
+          className="rounded-xl border border-slate-700 px-4 py-2 text-sm font-medium text-white transition hover:border-slate-500"
+        >
+          Volver
+        </Link>
+      </div>
 
-        <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
-          <details>
-            <summary className="cursor-pointer list-none border-b border-slate-800 bg-slate-800/70 px-5 py-4 text-lg font-semibold text-white">
+      <section className="space-y-3">
+        <h2 className="text-2xl font-semibold">Historial de actuaciones</h2>
+        <ObligationActivityPanel
+          obligationId={obligation.id}
+          logs={logs}
+          role="admin"
+          returnPath={`/admin/obligations/${obligation.id}`}
+          pageSize={10}
+        />
+      </section>
+
+      <ObligationDetailCard obligation={obligation} />
+
+      <details className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+        <summary className="cursor-pointer list-none border-b border-slate-800 bg-slate-800/70 px-5 py-4 text-lg font-semibold text-white">
+          Gestión de la obligación
+        </summary>
+
+        <div className="space-y-4 px-4 py-4">
+          <details className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/30">
+            <summary className="cursor-pointer list-none border-b border-slate-800 px-4 py-3 text-sm font-semibold text-white">
               Editar obligación
             </summary>
-            <div className="px-5 py-5">
+            <div className="px-4 py-4">
               <AdminEditObligationForm
                 obligation={obligation}
                 assignableProfiles={assignableProfiles}
               />
             </div>
           </details>
-        </div>
 
-        <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-          <UploadObligationDocumentForm obligationId={obligation.id} />
+          <details className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/30">
+            <summary className="cursor-pointer list-none border-b border-slate-800 px-4 py-3 text-sm font-semibold text-white">
+              Documentos base
+            </summary>
+            <div className="px-4 py-4">
+              <ObligationBaseDocumentsList
+                documents={documents}
+                returnPath={`/admin/obligations/${obligation.id}`}
+              />
+            </div>
+          </details>
 
-          <ObligationBaseDocumentsList
-            documents={documents}
-            returnPath={`/admin/obligations/${obligation.id}`}
-          />
+          <details className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/30">
+            <summary className="cursor-pointer list-none border-b border-slate-800 px-4 py-3 text-sm font-semibold text-white">
+              Cargar documento base
+            </summary>
+            <div className="px-4 py-4">
+              <UploadObligationDocumentForm obligationId={obligation.id} />
+            </div>
+          </details>
         </div>
-
-        <div className="space-y-4">
-          <h2 className="text-2xl font-semibold">Historial de actuaciones</h2>
-          <ObligationActivityPanel
-            obligationId={obligation.id}
-            logs={logs}
-            role="admin"
-            returnPath={`/admin/obligations/${obligation.id}`}
-          />
-        </div>
-      </div>
+      </details>
     </PageShell>
   );
 }

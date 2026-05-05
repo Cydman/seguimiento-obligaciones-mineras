@@ -15,13 +15,17 @@ export function UploadObligationDocumentForm({
   const uploaded = searchParams.get("uploaded") === "1";
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-      <h2 className="text-2xl font-semibold">Documentos base de la obligación</h2>
-      <p className="mt-2 text-sm text-slate-400">
-        Carga documentos generales o base en formato PDF. Tamaño máximo: 10 MB.
+    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <h2 className="text-lg font-semibold">Cargar documento base</h2>
+      <p className="mt-1 text-sm text-slate-400">
+        Carga documentos generales en PDF. Tamaño máximo: 10 MB.
       </p>
 
-      <form action={uploadObligationDocumentAction} className="mt-6 space-y-4">
+      <form
+        action={uploadObligationDocumentAction}
+        encType="multipart/form-data"
+        className="mt-4 space-y-4"
+      >
         <input type="hidden" name="obligation_id" value={obligationId} />
 
         <div>
@@ -37,8 +41,8 @@ export function UploadObligationDocumentForm({
           />
         </div>
 
-        <div className="flex items-center gap-4">
-          <SubmitButton />
+        <div className="flex flex-wrap items-center gap-3">
+          <SubmitButton idleLabel="Cargar documento" pendingLabel="Cargando..." />
           {uploaded ? (
             <p className="text-sm text-emerald-300">
               Documento cargado correctamente.

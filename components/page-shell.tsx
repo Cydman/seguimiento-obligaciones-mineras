@@ -123,7 +123,7 @@ export function PageShell({ title, description, children }: PageShellProps) {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="flex min-h-screen">
-        <aside className="hidden w-72 shrink-0 border-r border-slate-800/80 bg-slate-950/95 xl:flex xl:flex-col">
+        <aside className="hidden h-screen w-72 shrink-0 border-r border-slate-800/80 bg-slate-950/95 xl:sticky xl:top-0 xl:flex xl:flex-col">
           <div className="border-b border-slate-800/80 px-5 py-5">
             <p className="text-[11px] uppercase tracking-[0.24em] text-emerald-300">
               Seguimiento minero
@@ -134,7 +134,7 @@ export function PageShell({ title, description, children }: PageShellProps) {
             </p>
           </div>
 
-          <nav className="flex-1 space-y-2 px-4 py-5">
+          <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-5">
             {navItems.map((item) => {
               const active = item.isActive(pathname, searchParams);
               const Icon = item.icon;

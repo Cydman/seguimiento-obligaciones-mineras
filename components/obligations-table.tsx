@@ -1,5 +1,13 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import { StatusBadge } from "@/components/status-badge";
+import {
+  formatBusinessDaysRemaining,
+  getBusinessDaysBadgeClass,
+  getColombiaBusinessDaysRemaining,
+} from "@/lib/business-days";
 import { formatDateDisplay } from "@/lib/format-date";
 import type { Obligation } from "@/types/obligations";
 
@@ -49,10 +57,44 @@ function formatPriority(priority: string) {
   }
 }
 
+function BusinessDaysCell({ dueDate }: { dueDate: string }) {
+  const days = getColombiaBusinessDaysRemaining(dueDate);
+
+  return (
+    <span
+      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getBusinessDaysBadgeClass(
+        days
+      )}`}
+      title="Días hábiles restantes para el vencimiento"
+    >
+      {formatBusinessDaysRemaining(days)}
+    </span>
+  );
+}
+
+const PAGE_SIZE = 12;
+
 export function ObligationsTable({
   obligations,
   basePath = "/client",
 }: ObligationsTableProps) {
+  const ordered = useMemo(
+    () =>
+      [...obligations].sort(
+        (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+      ),
+    [obligations]
+  );
+
+  const totalPages = Math.max(1, Math.ceil(ordered.length / PAGE_SIZE));
+  const [page, setPage] = useState(1);
+  const currentPage = Math.min(page, totalPages);
+
+  const rows = ordered.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900">
       <div className="overflow-x-auto">
@@ -64,22 +106,23 @@ export function ObligationsTable({
               <th className="px-4 py-3">Categoría</th>
               <th className="px-4 py-3">Autoridad</th>
               <th className="px-4 py-3">Prioridad</th>
+              <th className="px-4 py-3">Días háb.</th>
               <th className="px-4 py-3">Vencimiento</th>
               <th className="px-4 py-3">Estado</th>
             </tr>
           </thead>
           <tbody>
-            {obligations.length === 0 ? (
+            {rows.length === 0 ? (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={8}
                   className="px-4 py-10 text-center text-sm text-slate-400"
                 >
                   No hay obligaciones para los filtros seleccionados.
                 </td>
               </tr>
             ) : (
-              obligations.map((obligation) => (
+              rows.map((obligation) => (
                 <tr
                   key={obligation.id}
                   className="border-t border-slate-800 text-slate-200"
@@ -103,6 +146,9 @@ export function ObligationsTable({
                     {formatPriority(obligation.priority)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
+                    <BusinessDaysCell dueDate={obligation.dueDate} />
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
                     {formatDateDisplay(obligation.dueDate)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
@@ -114,6 +160,35 @@ export function ObligationsTable({
           </tbody>
         </table>
       </div>
+
+      {ordered.length > PAGE_SIZE ? (
+        <div className="flex items-center justify-between border-t border-slate-800 px-4 py-3 text-sm text-slate-300">
+          <span>
+            Página {currentPage} de {totalPages}
+          </span>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="rounded-xl border border-slate-700 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Anterior
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setPage((prev) => Math.min(totalPages, prev + 1))
+              }
+              disabled={currentPage === totalPages}
+              className="rounded-xl border border-slate-700 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

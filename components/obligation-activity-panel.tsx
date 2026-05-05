@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import {
   createManualActivityAction,
   deleteManualActivityAction,
@@ -24,93 +25,124 @@ export function ObligationActivityPanel({
   logs,
   role,
   returnPath,
+  pageSize = 10,
 }: {
   obligationId: string;
   logs: ObligationActivityLog[];
   role: PanelRole;
   returnPath: string;
+  pageSize?: number;
 }) {
   const canCreate = role === "admin" || role === "specialist";
   const canEdit = role === "admin";
 
+  const orderedLogs = useMemo(
+    () =>
+      [...logs].sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ),
+    [logs]
+  );
+
+  const totalPages = Math.max(1, Math.ceil(orderedLogs.length / pageSize));
+  const [page, setPage] = useState(1);
+  const currentPage = Math.min(page, totalPages);
+
+  const visibleLogs = orderedLogs.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   return (
     <div className="space-y-4">
       {canCreate ? (
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
-          <h2 className="text-lg font-semibold">Nueva actuación</h2>
-          <p className="mt-1 text-xs text-slate-400">
-            Registra la acción realizada. El PDF es opcional y solo se permite en formato PDF.
-          </p>
+        <details className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+          <summary className="cursor-pointer list-none border-b border-slate-800 bg-slate-800/60 px-4 py-3 text-sm font-semibold text-white">
+            Registrar nueva actuación
+          </summary>
 
-          <form
-            action={createManualActivityAction}
-            className="mt-4 grid gap-3 xl:grid-cols-[0.9fr_2fr_1.1fr_auto]"
-          >
-            <input type="hidden" name="obligation_id" value={obligationId} />
-            <input type="hidden" name="return_path" value={returnPath} />
-
-            <input
-              name="action"
-              required
-              placeholder="Acción"
-              className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white"
-            />
-
-            <input
-              name="note"
-              required
-              placeholder="Detalle de la actuación"
-              className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white"
-            />
-
-            <input
-              name="file"
-              type="file"
-              accept="application/pdf"
-              className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white"
-            />
-
-            <button
-              type="submit"
-              className="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-4 py-3 text-slate-950 transition hover:bg-emerald-400"
-              title="Guardar actuación"
+          <div className="px-4 py-4">
+            <form
+              action={createManualActivityAction}
+              encType="multipart/form-data"
+              className="grid gap-3 xl:grid-cols-[1fr_1.8fr_1fr_auto]"
             >
-              <Save size={16} />
-            </button>
-          </form>
-        </div>
+              <input type="hidden" name="obligation_id" value={obligationId} />
+              <input type="hidden" name="return_path" value={returnPath} />
+
+              <input
+                name="action"
+                required
+                placeholder="Acción"
+                className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white"
+              />
+
+              <input
+                name="note"
+                required
+                placeholder="Detalle breve de la actuación"
+                className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white"
+              />
+
+              <input
+                name="file"
+                type="file"
+                accept="application/pdf"
+                className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white"
+              />
+
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-4 py-3 text-slate-950 transition hover:bg-emerald-400"
+                title="Guardar actuación"
+              >
+                <Save size={16} />
+              </button>
+            </form>
+          </div>
+        </details>
       ) : null}
 
       <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
         <div
           className={`grid gap-3 border-b border-slate-800 bg-slate-800/70 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-300 ${
             canEdit
-              ? "grid-cols-[1fr_1.2fr_auto_auto]"
-              : "grid-cols-[1fr_1.2fr_auto]"
+              ? "grid-cols-[120px_minmax(0,1fr)_auto_auto]"
+              : "grid-cols-[120px_minmax(0,1fr)_auto]"
           }`}
         >
           <div>Fecha</div>
-          <div>Acción</div>
+          <div>Actuación</div>
           <div>PDF</div>
           {canEdit ? <div>Editar</div> : null}
         </div>
 
-        {logs.length === 0 ? (
-          <div className="px-4 py-4 text-sm text-slate-400">
+        {visibleLogs.length === 0 ? (
+          <div className="px-4 py-8 text-sm text-slate-400">
             No hay actuaciones registradas.
           </div>
         ) : (
-          logs.map((log) => (
+          visibleLogs.map((log) => (
             <details key={log.id} className="border-t border-slate-800">
               <summary
                 className={`grid cursor-pointer list-none gap-3 px-4 py-3 text-sm text-slate-200 ${
                   canEdit
-                    ? "grid-cols-[1fr_1.2fr_auto_auto]"
-                    : "grid-cols-[1fr_1.2fr_auto]"
+                    ? "grid-cols-[120px_minmax(0,1fr)_auto_auto]"
+                    : "grid-cols-[120px_minmax(0,1fr)_auto]"
                 }`}
               >
-                <div>{formatActivityDate(log.created_at, role)}</div>
-                <div className="truncate font-medium">{log.action}</div>
+                <div className="text-sm text-slate-300">
+                  {formatActivityDate(log.created_at, role)}
+                </div>
+
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-white">{log.action}</p>
+                  <p className="mt-1 truncate text-xs text-slate-400">
+                    {log.note || "Sin detalle registrado."}
+                  </p>
+                </div>
+
                 <div className="flex items-center">
                   {log.attachment_path ? (
                     <div className="flex items-center gap-2">
@@ -137,10 +169,7 @@ export function ObligationActivityPanel({
 
                 {canEdit ? (
                   <div className="flex items-center">
-                    <span
-                      className="inline-flex items-center justify-center rounded-lg border border-slate-700 p-2 text-slate-200"
-                      title="Editar"
-                    >
+                    <span className="inline-flex items-center justify-center rounded-lg border border-slate-700 p-2 text-slate-200">
                       <Pencil size={14} />
                     </span>
                   </div>
@@ -161,7 +190,8 @@ export function ObligationActivityPanel({
                   <>
                     <form
                       action={updateManualActivityAction}
-                      className="grid gap-3 xl:grid-cols-[0.9fr_2fr_1.1fr_auto]"
+                      encType="multipart/form-data"
+                      className="grid gap-3 xl:grid-cols-[1fr_1.8fr_1fr_auto]"
                     >
                       <input type="hidden" name="activity_id" value={log.id} />
                       <input type="hidden" name="obligation_id" value={obligationId} />
@@ -297,6 +327,35 @@ export function ObligationActivityPanel({
             </details>
           ))
         )}
+
+        {orderedLogs.length > pageSize ? (
+          <div className="flex items-center justify-between border-t border-slate-800 px-4 py-3 text-sm text-slate-300">
+            <span>
+              Página {currentPage} de {totalPages}
+            </span>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="rounded-xl border border-slate-700 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Anterior
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setPage((prev) => Math.min(totalPages, prev + 1))
+                }
+                disabled={currentPage === totalPages}
+                className="rounded-xl border border-slate-700 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
