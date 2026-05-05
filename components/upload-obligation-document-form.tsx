@@ -35,14 +35,17 @@ export function UploadObligationDocumentForm({
           <input
             name="file"
             type="file"
-            accept="application/pdf"
+            accept="application/pdf,.pdf"
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
             required
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <SubmitButton idleLabel="Cargar documento" pendingLabel="Cargando..." />
+          <SubmitButton
+            idleLabel="Cargar documento"
+            pendingLabel="Cargando..."
+          />
           {uploaded ? (
             <p className="text-sm text-emerald-300">
               Documento cargado correctamente.

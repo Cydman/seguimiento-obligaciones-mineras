@@ -34,21 +34,24 @@ function getNavItems(pathname: string): NavItem[] {
         label: "Dashboard",
         icon: LayoutDashboard,
         isActive: (currentPath, searchParams) =>
-          currentPath === "/admin" && searchParams.get("section") !== "obligations",
+          currentPath === "/admin" &&
+          searchParams.get("section") !== "obligations",
       },
       {
         href: "/admin?section=obligations",
         label: "Obligaciones",
         icon: ClipboardList,
         isActive: (currentPath, searchParams) =>
-          currentPath === "/admin" && searchParams.get("section") === "obligations",
+          currentPath === "/admin" &&
+          searchParams.get("section") === "obligations",
       },
       {
         href: "/admin/users",
         label: "Usuarios",
         icon: Users,
         isActive: (currentPath) =>
-          currentPath === "/admin/users" || currentPath.startsWith("/admin/users/"),
+          currentPath === "/admin/users" ||
+          currentPath.startsWith("/admin/users/"),
       },
       {
         href: "/admin/organizations",
@@ -63,7 +66,8 @@ function getNavItems(pathname: string): NavItem[] {
         label: "Títulos",
         icon: ScrollText,
         isActive: (currentPath) =>
-          currentPath === "/admin/titles" || currentPath.startsWith("/admin/titles/"),
+          currentPath === "/admin/titles" ||
+          currentPath.startsWith("/admin/titles/"),
       },
     ];
   }
@@ -76,7 +80,8 @@ function getNavItems(pathname: string): NavItem[] {
         icon: LayoutDashboard,
         isActive: (currentPath, searchParams) =>
           currentPath === "/specialist" &&
-          (searchParams.get("view") === "general" || !searchParams.get("view")),
+          (searchParams.get("view") === "general" ||
+            !searchParams.get("view")),
       },
       {
         href: "/specialist?view=obligations",
@@ -85,7 +90,8 @@ function getNavItems(pathname: string): NavItem[] {
         isActive: (currentPath, searchParams) =>
           currentPath === "/specialist/obligations" ||
           currentPath.startsWith("/specialist/obligations/") ||
-          (currentPath === "/specialist" && searchParams.get("view") === "obligations"),
+          (currentPath === "/specialist" &&
+            searchParams.get("view") === "obligations"),
       },
     ];
   }
@@ -98,7 +104,8 @@ function getNavItems(pathname: string): NavItem[] {
         icon: LayoutDashboard,
         isActive: (currentPath, searchParams) =>
           currentPath === "/client" &&
-          (searchParams.get("view") === "general" || !searchParams.get("view")),
+          (searchParams.get("view") === "general" ||
+            !searchParams.get("view")),
       },
       {
         href: "/client?view=obligations",
@@ -107,7 +114,8 @@ function getNavItems(pathname: string): NavItem[] {
         isActive: (currentPath, searchParams) =>
           currentPath === "/client/obligations" ||
           currentPath.startsWith("/client/obligations/") ||
-          (currentPath === "/client" && searchParams.get("view") === "obligations"),
+          (currentPath === "/client" &&
+            searchParams.get("view") === "obligations"),
       },
     ];
   }
@@ -151,7 +159,11 @@ export function PageShell({ title, description, children }: PageShellProps) {
                 >
                   <Icon
                     size={18}
-                    className={active ? "opacity-100" : "opacity-80 group-hover:opacity-100"}
+                    className={
+                      active
+                        ? "opacity-100"
+                        : "opacity-80 group-hover:opacity-100"
+                    }
                   />
                   <span>{item.label}</span>
                 </Link>
@@ -175,14 +187,19 @@ export function PageShell({ title, description, children }: PageShellProps) {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="hidden items-center gap-2 rounded-2xl border border-slate-800 bg-slate-900 px-4 py-2.5 lg:flex">
+                <form
+                  method="GET"
+                  action="/search"
+                  className="hidden items-center gap-2 rounded-2xl border border-slate-800 bg-slate-900 px-4 py-2.5 lg:flex"
+                >
                   <Search size={16} className="text-slate-400" />
                   <input
+                    name="q"
                     type="text"
                     placeholder="Búsqueda global"
                     className="w-56 bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
                   />
-                </div>
+                </form>
 
                 <div className="hidden rounded-2xl border border-slate-800 bg-slate-900 px-4 py-2.5 text-sm text-slate-300 lg:block">
                   Sesión activa
