@@ -4,6 +4,16 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentProfile } from "@/modules/auth/get-current-profile";
+import type { Database } from "@/types/supabase";
+
+type AppRole = Database["public"]["Enums"]["app_role"];
+type MembershipInsert = Database["public"]["Tables"]["memberships"]["Insert"];
+type ObligationCategory =
+  | "tecnica"
+  | "juridica"
+  | "economica"
+  | "social"
+  | "ambiental";
 
 function normalizeText(value: FormDataEntryValue | null) {
   const text = String(value ?? "").trim();
@@ -15,10 +25,82 @@ function normalizeOrganizationId(value: FormDataEntryValue | null) {
   return text ? text : null;
 }
 
-function normalizeSpecialty(role: string, value: FormDataEntryValue | null) {
+function normalizeRole(value: FormDataEntryValue | null): AppRole {
+  const text = String(value ?? "client").trim();
+  if (text === "admin" || text === "client" || text === "specialist") {
+    return text;
+  }
+  throw new Error("Rol inválido.");
+}
+
+function normalizeSpecialty(
+  role: AppRole,
+  value: FormDataEntryValue | null
+): ObligationCategory | null {
   if (role !== "specialist") return null;
+
   const text = String(value ?? "").trim();
-  return text ? text : null;
+  if (!text) return null;
+
+  if (
+    text === "tecnica" ||
+    text === "juridica" ||
+    text === "economica" ||
+    text === "social" ||
+    text === "ambiental"
+  ) {
+    return text;
+  }
+
+  throw new Error("Especialidad inválida.");
+}
+
+async function syncMembershipsForProfile({
+  profileId,
+  role,
+  organizationId,
+  isActive,
+}: {
+  profileId: string;
+  role: AppRole;
+  organizationId: string | null;
+  isActive: boolean;
+}) {
+  const adminClient = createAdminClient();
+
+  const { error: deleteError } = await adminClient
+    .from("memberships")
+    .delete()
+    .eq("profile_id", profileId);
+
+  if (deleteError) {
+    throw new Error(
+      `No fue posible sincronizar membresías previas: ${deleteError.message}`
+    );
+  }
+
+  if (!organizationId || !isActive || role === "admin") {
+    return;
+  }
+
+  const membership: MembershipInsert = {
+    profile_id: profileId,
+    organization_id: organizationId,
+    title_id: null,
+    role,
+    access_scope: "organization",
+    is_active: true,
+  };
+
+  const { error: insertError } = await adminClient
+    .from("memberships")
+    .insert(membership);
+
+  if (insertError) {
+    throw new Error(
+      `Perfil actualizado, pero no fue posible crear la membresía: ${insertError.message}`
+    );
+  }
 }
 
 export async function createUserAccessAction(formData: FormData) {
@@ -31,7 +113,7 @@ export async function createUserAccessAction(formData: FormData) {
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "").trim();
-  const role = String(formData.get("role") ?? "client").trim();
+  const role = normalizeRole(formData.get("role"));
   const organizationId = normalizeOrganizationId(formData.get("organization_id"));
   const isActive = String(formData.get("is_active") ?? "true").trim() === "true";
   const specialty = normalizeSpecialty(role, formData.get("specialty"));
@@ -41,20 +123,19 @@ export async function createUserAccessAction(formData: FormData) {
     throw new Error("Debes ingresar correo y contraseña.");
   }
 
-  if (!["admin", "client", "specialist"].includes(role)) {
-    throw new Error("Rol inválido.");
-  }
-
   const adminClient = createAdminClient();
 
   const { data, error } = await adminClient.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
+    user_metadata: fullName ? { full_name: fullName } : undefined,
   });
 
   if (error || !data.user) {
-    throw new Error(`Error creando usuario: ${error?.message ?? "No fue posible crear el usuario."}`);
+    throw new Error(
+      `Error creando usuario: ${error?.message ?? "No fue posible crear el usuario."}`
+    );
   }
 
   const { error: updateError } = await adminClient
@@ -66,14 +147,25 @@ export async function createUserAccessAction(formData: FormData) {
       email,
       specialty,
       full_name: fullName,
+      updated_at: new Date().toISOString(),
     })
     .eq("id", data.user.id);
 
   if (updateError) {
-    throw new Error(`Usuario creado, pero no fue posible actualizar el perfil: ${updateError.message}`);
+    throw new Error(
+      `Usuario creado, pero no fue posible actualizar el perfil: ${updateError.message}`
+    );
   }
 
+  await syncMembershipsForProfile({
+    profileId: data.user.id,
+    role,
+    organizationId,
+    isActive,
+  });
+
   revalidatePath("/admin/users");
+  revalidatePath("/admin");
   redirect("/admin/users?created=1");
 }
 
@@ -86,7 +178,7 @@ export async function updateUserProfileAction(formData: FormData) {
   }
 
   const profileId = String(formData.get("profile_id") ?? "").trim();
-  const role = String(formData.get("role") ?? "client").trim();
+  const role = normalizeRole(formData.get("role"));
   const organizationId = normalizeOrganizationId(formData.get("organization_id"));
   const isActive = String(formData.get("is_active") ?? "true").trim() === "true";
   const specialty = normalizeSpecialty(role, formData.get("specialty"));
@@ -96,12 +188,10 @@ export async function updateUserProfileAction(formData: FormData) {
     throw new Error("No se recibió el perfil.");
   }
 
-  if (!["admin", "client", "specialist"].includes(role)) {
-    throw new Error("Rol inválido.");
-  }
-
   if (profileId === user.id && (!isActive || role !== "admin")) {
-    throw new Error("No puedes quitarte el rol admin ni desactivar tu propio acceso.");
+    throw new Error(
+      "No puedes quitarte el rol admin ni desactivar tu propio acceso."
+    );
   }
 
   const adminClient = createAdminClient();
@@ -114,6 +204,7 @@ export async function updateUserProfileAction(formData: FormData) {
       is_active: isActive,
       specialty,
       full_name: fullName,
+      updated_at: new Date().toISOString(),
     })
     .eq("id", profileId);
 
@@ -121,6 +212,14 @@ export async function updateUserProfileAction(formData: FormData) {
     throw new Error(`Error actualizando perfil: ${error.message}`);
   }
 
+  await syncMembershipsForProfile({
+    profileId,
+    role,
+    organizationId,
+    isActive,
+  });
+
   revalidatePath("/admin/users");
+  revalidatePath("/admin");
   redirect("/admin/users?updated=1");
 }
